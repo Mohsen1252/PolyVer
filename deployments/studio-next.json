@@ -1,0 +1,569 @@
+{
+  "network": "studio-next",
+  "chain_id": 61997,
+  "rpc_url": "https://studio-next.genlayer.com/api",
+  "contract_address": "0xDe42da18A2b03B877D66Fa46289dDD9B0AC9a0B8",
+  "explorer_url": "https://explorer-studio-next.genlayer.com/address/0xDe42da18A2b03B877D66Fa46289dDD9B0AC9a0B8",
+  "source": "contracts/poly_verdict.py",
+  "runner": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng",
+  "bytecode_sha256": "5142568df4d38a675b9d766b597e254b0a19ac796467ffde2a598a57615aa19a",
+  "deployer": "0x27a1Ebe0C137F74D3fbdeF8796B3B5Ad7af45aaa",
+  "deployed_at": "2026-10-01T20:35:38+00:00",
+  "deploy_tx": {
+    "hash": "0x654a2fcd5fa49dcd4927ef9cf043cb932b52c056a9597787568a4203a476aaf7",
+    "url": "https://explorer-studio-next.genlayer.com/transactions/0x654a2fcd5fa49dcd4927ef9cf043cb932b52c056a9597787568a4203a476aaf7"
+  },
+  "cases": {
+    "case-1": {
+      "market_id": "starship-flight-8",
+      "title": "Has SpaceX Starship completed Orbital Test Flight 8?"
+    },
+    "case-2a": {
+      "market_id": "fed-100bps-sep-2026",
+      "title": "Did the US Federal Reserve cut rates by 100bps in Sep 2026?"
+    },
+    "case-2b": {
+      "market_id": "fed-100bps-sep-2026-primary",
+      "title": "Did the US Federal Reserve cut rates by 100bps in Sep 2026? (primary sources)"
+    },
+    "case-3": {
+      "market_id": "country-x-treaty-y-q3",
+      "title": "Did Country X sign Treaty Y by Q3?"
+    },
+    "case-4": {
+      "market_id": "boe-cut-sep-2026",
+      "title": "Did the Bank of England cut Bank Rate at its September 2026 meeting?"
+    },
+    "case-5": {
+      "market_id": "starship-flight-8-appeal",
+      "title": "Appeal demo: did Starship Flight 8 take place? (challenge game)"
+    }
+  },
+  "transactions": [
+    {
+      "label": "case-1: create market",
+      "market_id": "starship-flight-8",
+      "fn": "create_market",
+      "sender": "0x27a1Ebe0C137F74D3fbdeF8796B3B5Ad7af45aaa",
+      "value_wei": 0,
+      "hash": "0x2291c1f478f8b3185fb4fb9fea31aefb52aa4be92be8b40a429b11c3d9d1d91c",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0x2291c1f478f8b3185fb4fb9fea31aefb52aa4be92be8b40a429b11c3d9d1d91c",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x6760cDeC573cf38568C59872ee48B6fED41F8A4c": "idle",
+        "0x8142E5D1b04f84c3cD995C25AAe31B31F8e0379E": "agree",
+        "0xEEcEC5D1E07Ee40f5cb85aF922178Dc01278013C": "agree",
+        "0xa0435f618c1F27B254998018AEa8Da5C77187852": "idle",
+        "0xcEf1Baa172d0b4D99Dcc505B36332F26D1088025": "agree"
+      },
+      "agree": 3,
+      "total": 5
+    },
+    {
+      "label": "case-2a: create market",
+      "market_id": "fed-100bps-sep-2026",
+      "fn": "create_market",
+      "sender": "0x27a1Ebe0C137F74D3fbdeF8796B3B5Ad7af45aaa",
+      "value_wei": 0,
+      "hash": "0xc748f10094698097f2b970a1dbb3958009ff26bce644961b1c7c4ba09530cede",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0xc748f10094698097f2b970a1dbb3958009ff26bce644961b1c7c4ba09530cede",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x05d8aFc66B515038712537f99cAAEA73d16f0007": "agree",
+        "0x1dA3a7de8EA65A318bf88Eb63d3dC55295Dd257E": "agree",
+        "0x8142E5D1b04f84c3cD995C25AAe31B31F8e0379E": "idle",
+        "0xEEcEC5D1E07Ee40f5cb85aF922178Dc01278013C": "agree",
+        "0xf13c3DfE38C8E206C33F750C24a1b043b63Cb810": "idle"
+      },
+      "agree": 3,
+      "total": 5
+    },
+    {
+      "label": "case-2b: create market",
+      "market_id": "fed-100bps-sep-2026-primary",
+      "fn": "create_market",
+      "sender": "0x27a1Ebe0C137F74D3fbdeF8796B3B5Ad7af45aaa",
+      "value_wei": 0,
+      "hash": "0xa528600ce5d074c1bedb0add24fa54633644ff19e20193b7ccbcd5758fd26243",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0xa528600ce5d074c1bedb0add24fa54633644ff19e20193b7ccbcd5758fd26243",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x1dA3a7de8EA65A318bf88Eb63d3dC55295Dd257E": "agree",
+        "0x8D32eb5D0207f7E230C45e7BF0D14B2ED5DA3028": "idle",
+        "0xE4E106086F167D75E2270fa5f3680f6ac598d179": "idle",
+        "0xE52dDB85587585930b1E5f1Fe88fef21CcA49829": "agree",
+        "0xcF5Fd792Df0Dc9d297af75c82B4A0011e8FA1A4A": "agree"
+      },
+      "agree": 3,
+      "total": 5
+    },
+    {
+      "label": "case-3: create market",
+      "market_id": "country-x-treaty-y-q3",
+      "fn": "create_market",
+      "sender": "0x27a1Ebe0C137F74D3fbdeF8796B3B5Ad7af45aaa",
+      "value_wei": 0,
+      "hash": "0x162d213619ed4d162741376d2d515a7d031f9918d9148d95fde2aea3c907791c",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0x162d213619ed4d162741376d2d515a7d031f9918d9148d95fde2aea3c907791c",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x5cDf4BdDeEDa0e32ED596b94f69AcC0FbB57f264": "idle",
+        "0xA793D9dc0ED9edC1f9F732bB68b5D3AFA934F52D": "agree",
+        "0xE52dDB85587585930b1E5f1Fe88fef21CcA49829": "idle",
+        "0xEEcEC5D1E07Ee40f5cb85aF922178Dc01278013C": "agree",
+        "0xcF5Fd792Df0Dc9d297af75c82B4A0011e8FA1A4A": "agree"
+      },
+      "agree": 3,
+      "total": 5
+    },
+    {
+      "label": "case-4: create market",
+      "market_id": "boe-cut-sep-2026",
+      "fn": "create_market",
+      "sender": "0x27a1Ebe0C137F74D3fbdeF8796B3B5Ad7af45aaa",
+      "value_wei": 0,
+      "hash": "0xf53708bf3275da77abb0a50219bcc51cbf591d79b0842e98fbaec24b79fe0324",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0xf53708bf3275da77abb0a50219bcc51cbf591d79b0842e98fbaec24b79fe0324",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x05d8aFc66B515038712537f99cAAEA73d16f0007": "agree",
+        "0x1dA3a7de8EA65A318bf88Eb63d3dC55295Dd257E": "agree",
+        "0xcF5Fd792Df0Dc9d297af75c82B4A0011e8FA1A4A": "agree",
+        "0xcbC79F96B7A275b23EE64d80a98325107F6E1b77": "idle",
+        "0xf13c3DfE38C8E206C33F750C24a1b043b63Cb810": "idle"
+      },
+      "agree": 3,
+      "total": 5
+    },
+    {
+      "label": "case-5: create market",
+      "market_id": "starship-flight-8-appeal",
+      "fn": "create_market",
+      "sender": "0x27a1Ebe0C137F74D3fbdeF8796B3B5Ad7af45aaa",
+      "value_wei": 0,
+      "hash": "0xc263355ee441ab170b155dd6c3620bdbdb4c247b1346824e616d5b6b93effa1d",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0xc263355ee441ab170b155dd6c3620bdbdb4c247b1346824e616d5b6b93effa1d",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x05d8aFc66B515038712537f99cAAEA73d16f0007": "agree",
+        "0x8142E5D1b04f84c3cD995C25AAe31B31F8e0379E": "idle",
+        "0xE4E106086F167D75E2270fa5f3680f6ac598d179": "idle",
+        "0xcEf1Baa172d0b4D99Dcc505B36332F26D1088025": "agree",
+        "0xf13c3DfE38C8E206C33F750C24a1b043b63Cb810": "agree"
+      },
+      "agree": 3,
+      "total": 5
+    },
+    {
+      "label": "case-1: bet YES",
+      "market_id": "starship-flight-8",
+      "fn": "place_prediction",
+      "sender": "0x27a1Ebe0C137F74D3fbdeF8796B3B5Ad7af45aaa",
+      "value_wei": 50000000000000000,
+      "hash": "0x1dd41771e02c94e2a276602f3ba29aa6e46c5884a5dcc26ce1cde67a4190a678",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0x1dd41771e02c94e2a276602f3ba29aa6e46c5884a5dcc26ce1cde67a4190a678",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x1dA3a7de8EA65A318bf88Eb63d3dC55295Dd257E": "idle",
+        "0x8D32eb5D0207f7E230C45e7BF0D14B2ED5DA3028": "agree",
+        "0xE52dDB85587585930b1E5f1Fe88fef21CcA49829": "agree",
+        "0xEEcEC5D1E07Ee40f5cb85aF922178Dc01278013C": "agree",
+        "0xa0435f618c1F27B254998018AEa8Da5C77187852": "idle"
+      },
+      "agree": 3,
+      "total": 5
+    },
+    {
+      "label": "case-1: bet NO",
+      "market_id": "starship-flight-8",
+      "fn": "place_prediction",
+      "sender": "0x1cc8C33351C41b24FA677E95F3E5a950cabed754",
+      "value_wei": 30000000000000000,
+      "hash": "0xa220f55e423fdfd2c39fd5ccf757adbf56c55239f7aea8a8c4853da1ea0c0782",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0xa220f55e423fdfd2c39fd5ccf757adbf56c55239f7aea8a8c4853da1ea0c0782",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x05d8aFc66B515038712537f99cAAEA73d16f0007": "agree",
+        "0x8D32eb5D0207f7E230C45e7BF0D14B2ED5DA3028": "idle",
+        "0xE52dDB85587585930b1E5f1Fe88fef21CcA49829": "agree",
+        "0xa0435f618c1F27B254998018AEa8Da5C77187852": "idle",
+        "0xcbC79F96B7A275b23EE64d80a98325107F6E1b77": "agree"
+      },
+      "agree": 3,
+      "total": 5
+    },
+    {
+      "label": "case-2a: bet YES",
+      "market_id": "fed-100bps-sep-2026",
+      "fn": "place_prediction",
+      "sender": "0x27a1Ebe0C137F74D3fbdeF8796B3B5Ad7af45aaa",
+      "value_wei": 50000000000000000,
+      "hash": "0xbf05b87b8ce16cd6a3b17dacec65590a07644a3cf7b89062fa4026afaf74e9f4",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0xbf05b87b8ce16cd6a3b17dacec65590a07644a3cf7b89062fa4026afaf74e9f4",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x5A4230B920b18c4AFD3A28F99Eae669B7F2cdC1e": "idle",
+        "0x5cDf4BdDeEDa0e32ED596b94f69AcC0FbB57f264": "agree",
+        "0x6760cDeC573cf38568C59872ee48B6fED41F8A4c": "agree",
+        "0x8142E5D1b04f84c3cD995C25AAe31B31F8e0379E": "agree",
+        "0xA793D9dc0ED9edC1f9F732bB68b5D3AFA934F52D": "idle"
+      },
+      "agree": 3,
+      "total": 5
+    },
+    {
+      "label": "case-2a: bet NO",
+      "market_id": "fed-100bps-sep-2026",
+      "fn": "place_prediction",
+      "sender": "0x1cc8C33351C41b24FA677E95F3E5a950cabed754",
+      "value_wei": 30000000000000000,
+      "hash": "0x2bfb4591da1a2d5478520d7c474d9140f3bdc49d5b81addbb107cd29f0a09b49",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0x2bfb4591da1a2d5478520d7c474d9140f3bdc49d5b81addbb107cd29f0a09b49",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x05d8aFc66B515038712537f99cAAEA73d16f0007": "agree",
+        "0x5cDf4BdDeEDa0e32ED596b94f69AcC0FbB57f264": "idle",
+        "0x8142E5D1b04f84c3cD995C25AAe31B31F8e0379E": "idle",
+        "0x8D32eb5D0207f7E230C45e7BF0D14B2ED5DA3028": "agree",
+        "0xcbC79F96B7A275b23EE64d80a98325107F6E1b77": "agree"
+      },
+      "agree": 3,
+      "total": 5
+    },
+    {
+      "label": "case-2b: bet YES",
+      "market_id": "fed-100bps-sep-2026-primary",
+      "fn": "place_prediction",
+      "sender": "0x27a1Ebe0C137F74D3fbdeF8796B3B5Ad7af45aaa",
+      "value_wei": 50000000000000000,
+      "hash": "0x96ef24407767055f0cabe064f422a2f5ce9641c844a0c3bc35d258afe22df784",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0x96ef24407767055f0cabe064f422a2f5ce9641c844a0c3bc35d258afe22df784",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x05d8aFc66B515038712537f99cAAEA73d16f0007": "agree",
+        "0xA793D9dc0ED9edC1f9F732bB68b5D3AFA934F52D": "agree",
+        "0xE52dDB85587585930b1E5f1Fe88fef21CcA49829": "idle",
+        "0xa0435f618c1F27B254998018AEa8Da5C77187852": "idle",
+        "0xcF5Fd792Df0Dc9d297af75c82B4A0011e8FA1A4A": "agree"
+      },
+      "agree": 3,
+      "total": 5
+    },
+    {
+      "label": "case-2b: bet NO",
+      "market_id": "fed-100bps-sep-2026-primary",
+      "fn": "place_prediction",
+      "sender": "0x1cc8C33351C41b24FA677E95F3E5a950cabed754",
+      "value_wei": 30000000000000000,
+      "hash": "0x37a7b27f486f2938adcc660e1eacfdfeaf85ffcaa28c25120d1a96a44dd8c4bd",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0x37a7b27f486f2938adcc660e1eacfdfeaf85ffcaa28c25120d1a96a44dd8c4bd",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x05d8aFc66B515038712537f99cAAEA73d16f0007": "agree",
+        "0x1dA3a7de8EA65A318bf88Eb63d3dC55295Dd257E": "agree",
+        "0x8D32eb5D0207f7E230C45e7BF0D14B2ED5DA3028": "idle",
+        "0xcEf1Baa172d0b4D99Dcc505B36332F26D1088025": "idle",
+        "0xf13c3DfE38C8E206C33F750C24a1b043b63Cb810": "agree"
+      },
+      "agree": 3,
+      "total": 5
+    },
+    {
+      "label": "case-3: bet YES",
+      "market_id": "country-x-treaty-y-q3",
+      "fn": "place_prediction",
+      "sender": "0x27a1Ebe0C137F74D3fbdeF8796B3B5Ad7af45aaa",
+      "value_wei": 50000000000000000,
+      "hash": "0x5e6ff0edd9eb01c23b7d14f387e66f9fa70580113b3ae698babb9a3ca78d12f1",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0x5e6ff0edd9eb01c23b7d14f387e66f9fa70580113b3ae698babb9a3ca78d12f1",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x1dA3a7de8EA65A318bf88Eb63d3dC55295Dd257E": "idle",
+        "0x5cDf4BdDeEDa0e32ED596b94f69AcC0FbB57f264": "agree",
+        "0xEEcEC5D1E07Ee40f5cb85aF922178Dc01278013C": "agree",
+        "0xcF5Fd792Df0Dc9d297af75c82B4A0011e8FA1A4A": "agree",
+        "0xcbC79F96B7A275b23EE64d80a98325107F6E1b77": "idle"
+      },
+      "agree": 3,
+      "total": 5
+    },
+    {
+      "label": "case-3: bet NO",
+      "market_id": "country-x-treaty-y-q3",
+      "fn": "place_prediction",
+      "sender": "0x1cc8C33351C41b24FA677E95F3E5a950cabed754",
+      "value_wei": 30000000000000000,
+      "hash": "0x55a2153eed5b29be1f371a79ffc4cd4ec7ac2c4f39f1e598fb4235d9404dcc3b",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0x55a2153eed5b29be1f371a79ffc4cd4ec7ac2c4f39f1e598fb4235d9404dcc3b",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x8142E5D1b04f84c3cD995C25AAe31B31F8e0379E": "agree",
+        "0x8D32eb5D0207f7E230C45e7BF0D14B2ED5DA3028": "agree",
+        "0xE52dDB85587585930b1E5f1Fe88fef21CcA49829": "idle",
+        "0xcEf1Baa172d0b4D99Dcc505B36332F26D1088025": "agree",
+        "0xcF5Fd792Df0Dc9d297af75c82B4A0011e8FA1A4A": "idle"
+      },
+      "agree": 3,
+      "total": 5
+    },
+    {
+      "label": "case-4: bet YES",
+      "market_id": "boe-cut-sep-2026",
+      "fn": "place_prediction",
+      "sender": "0x27a1Ebe0C137F74D3fbdeF8796B3B5Ad7af45aaa",
+      "value_wei": 50000000000000000,
+      "hash": "0x34805828b8710e4401f9acc0b499ff47a09ced58852da4eda915f5f8209a5d7f",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0x34805828b8710e4401f9acc0b499ff47a09ced58852da4eda915f5f8209a5d7f",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x5A4230B920b18c4AFD3A28F99Eae669B7F2cdC1e": "agree",
+        "0x5cDf4BdDeEDa0e32ED596b94f69AcC0FbB57f264": "agree",
+        "0x6760cDeC573cf38568C59872ee48B6fED41F8A4c": "idle",
+        "0x8D32eb5D0207f7E230C45e7BF0D14B2ED5DA3028": "agree",
+        "0xEEcEC5D1E07Ee40f5cb85aF922178Dc01278013C": "idle"
+      },
+      "agree": 3,
+      "total": 5
+    },
+    {
+      "label": "case-4: bet NO",
+      "market_id": "boe-cut-sep-2026",
+      "fn": "place_prediction",
+      "sender": "0x1cc8C33351C41b24FA677E95F3E5a950cabed754",
+      "value_wei": 30000000000000000,
+      "hash": "0xe681d6c66abecb4e43d99cd3949a8b3e8a586dc14264ec2ac0fb394ef87bcba8",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0xe681d6c66abecb4e43d99cd3949a8b3e8a586dc14264ec2ac0fb394ef87bcba8",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x5A4230B920b18c4AFD3A28F99Eae669B7F2cdC1e": "agree",
+        "0x5cDf4BdDeEDa0e32ED596b94f69AcC0FbB57f264": "agree",
+        "0xA793D9dc0ED9edC1f9F732bB68b5D3AFA934F52D": "agree",
+        "0xcEf1Baa172d0b4D99Dcc505B36332F26D1088025": "idle",
+        "0xcF5Fd792Df0Dc9d297af75c82B4A0011e8FA1A4A": "idle"
+      },
+      "agree": 3,
+      "total": 5
+    },
+    {
+      "label": "case-5: bet YES",
+      "market_id": "starship-flight-8-appeal",
+      "fn": "place_prediction",
+      "sender": "0x27a1Ebe0C137F74D3fbdeF8796B3B5Ad7af45aaa",
+      "value_wei": 50000000000000000,
+      "hash": "0x5268fe346e93ad90817e2b86ed370e357d0e5edc138d1303922dc5a9afab70e1",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0x5268fe346e93ad90817e2b86ed370e357d0e5edc138d1303922dc5a9afab70e1",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x5A4230B920b18c4AFD3A28F99Eae669B7F2cdC1e": "agree",
+        "0x6760cDeC573cf38568C59872ee48B6fED41F8A4c": "agree",
+        "0x8142E5D1b04f84c3cD995C25AAe31B31F8e0379E": "agree",
+        "0xE52dDB85587585930b1E5f1Fe88fef21CcA49829": "idle",
+        "0xcEf1Baa172d0b4D99Dcc505B36332F26D1088025": "idle"
+      },
+      "agree": 3,
+      "total": 5
+    },
+    {
+      "label": "case-5: bet NO",
+      "market_id": "starship-flight-8-appeal",
+      "fn": "place_prediction",
+      "sender": "0x1cc8C33351C41b24FA677E95F3E5a950cabed754",
+      "value_wei": 30000000000000000,
+      "hash": "0x136e976a8ab78284ee9f5dc28f78e3800843305021e0d2202e3936cde1e1323c",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0x136e976a8ab78284ee9f5dc28f78e3800843305021e0d2202e3936cde1e1323c",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x5A4230B920b18c4AFD3A28F99Eae669B7F2cdC1e": "idle",
+        "0x6760cDeC573cf38568C59872ee48B6fED41F8A4c": "agree",
+        "0xE52dDB85587585930b1E5f1Fe88fef21CcA49829": "agree",
+        "0xcbC79F96B7A275b23EE64d80a98325107F6E1b77": "idle",
+        "0xf13c3DfE38C8E206C33F750C24a1b043b63Cb810": "agree"
+      },
+      "agree": 3,
+      "total": 5
+    },
+    {
+      "label": "case-1: propose resolution",
+      "market_id": "starship-flight-8",
+      "fn": "propose_resolution",
+      "sender": "0x27a1Ebe0C137F74D3fbdeF8796B3B5Ad7af45aaa",
+      "value_wei": 100000000000000000,
+      "hash": "0x921f8da8b21ad98676ec1208657965648ac6e8860f9bc8abf5b0d5851fb19109",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0x921f8da8b21ad98676ec1208657965648ac6e8860f9bc8abf5b0d5851fb19109",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x05d8aFc66B515038712537f99cAAEA73d16f0007": "idle",
+        "0x8D32eb5D0207f7E230C45e7BF0D14B2ED5DA3028": "agree",
+        "0xEEcEC5D1E07Ee40f5cb85aF922178Dc01278013C": "idle",
+        "0xcF5Fd792Df0Dc9d297af75c82B4A0011e8FA1A4A": "agree",
+        "0xf13c3DfE38C8E206C33F750C24a1b043b63Cb810": "agree"
+      },
+      "agree": 3,
+      "total": 5
+    },
+    {
+      "label": "case-2a: propose resolution",
+      "market_id": "fed-100bps-sep-2026",
+      "fn": "propose_resolution",
+      "sender": "0x27a1Ebe0C137F74D3fbdeF8796B3B5Ad7af45aaa",
+      "value_wei": 100000000000000000,
+      "hash": "0xe5ec5e30ca8a075bae84cd8c9d7379d0d6da78771fbeadf1a9331ba7a736324d",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0xe5ec5e30ca8a075bae84cd8c9d7379d0d6da78771fbeadf1a9331ba7a736324d",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x1dA3a7de8EA65A318bf88Eb63d3dC55295Dd257E": "agree",
+        "0x5cDf4BdDeEDa0e32ED596b94f69AcC0FbB57f264": "idle",
+        "0x6760cDeC573cf38568C59872ee48B6fED41F8A4c": "agree",
+        "0xE52dDB85587585930b1E5f1Fe88fef21CcA49829": "agree",
+        "0xEEcEC5D1E07Ee40f5cb85aF922178Dc01278013C": "idle"
+      },
+      "agree": 3,
+      "total": 5
+    },
+    {
+      "label": "case-2b: propose resolution",
+      "market_id": "fed-100bps-sep-2026-primary",
+      "fn": "propose_resolution",
+      "sender": "0x27a1Ebe0C137F74D3fbdeF8796B3B5Ad7af45aaa",
+      "value_wei": 100000000000000000,
+      "hash": "0xf9ddb6c7d8443ef7fd4df317e9adac3f8f06fe93406ac6d9fc9f6b7e944bc9ec",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0xf9ddb6c7d8443ef7fd4df317e9adac3f8f06fe93406ac6d9fc9f6b7e944bc9ec",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x05d8aFc66B515038712537f99cAAEA73d16f0007": "agree",
+        "0x8142E5D1b04f84c3cD995C25AAe31B31F8e0379E": "agree",
+        "0x8D32eb5D0207f7E230C45e7BF0D14B2ED5DA3028": "idle",
+        "0xE4E106086F167D75E2270fa5f3680f6ac598d179": "agree",
+        "0xcF5Fd792Df0Dc9d297af75c82B4A0011e8FA1A4A": "idle"
+      },
+      "agree": 3,
+      "total": 5
+    },
+    {
+      "label": "case-3: propose resolution",
+      "market_id": "country-x-treaty-y-q3",
+      "fn": "propose_resolution",
+      "sender": "0x27a1Ebe0C137F74D3fbdeF8796B3B5Ad7af45aaa",
+      "value_wei": 100000000000000000,
+      "hash": "0xd62e7399b20653ce23d97f417efc2d7dd298056e897347d9aad1d8ad672d24a5",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0xd62e7399b20653ce23d97f417efc2d7dd298056e897347d9aad1d8ad672d24a5",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x05d8aFc66B515038712537f99cAAEA73d16f0007": "agree",
+        "0x6760cDeC573cf38568C59872ee48B6fED41F8A4c": "agree",
+        "0xA793D9dc0ED9edC1f9F732bB68b5D3AFA934F52D": "agree",
+        "0xcEf1Baa172d0b4D99Dcc505B36332F26D1088025": "idle",
+        "0xcF5Fd792Df0Dc9d297af75c82B4A0011e8FA1A4A": "idle"
+      },
+      "agree": 3,
+      "total": 5
+    },
+    {
+      "label": "case-5: propose resolution",
+      "market_id": "starship-flight-8-appeal",
+      "fn": "propose_resolution",
+      "sender": "0x27a1Ebe0C137F74D3fbdeF8796B3B5Ad7af45aaa",
+      "value_wei": 100000000000000000,
+      "hash": "0xa50903d208b1fc33f78d2d18140c10f2ad65a4668e4265ee9d1f547ad49e0f4e",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0xa50903d208b1fc33f78d2d18140c10f2ad65a4668e4265ee9d1f547ad49e0f4e",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x05d8aFc66B515038712537f99cAAEA73d16f0007": "agree",
+        "0xE52dDB85587585930b1E5f1Fe88fef21CcA49829": "disagree",
+        "0xEEcEC5D1E07Ee40f5cb85aF922178Dc01278013C": "agree",
+        "0xa0435f618c1F27B254998018AEa8Da5C77187852": "agree",
+        "0xcEf1Baa172d0b4D99Dcc505B36332F26D1088025": "idle"
+      },
+      "agree": 3,
+      "total": 5
+    },
+    {
+      "label": "challenge verdict (starship-flight-8-appeal)",
+      "market_id": "starship-flight-8-appeal",
+      "fn": "challenge_verdict",
+      "sender": "0x1cc8C33351C41b24FA677E95F3E5a950cabed754",
+      "value_wei": 200000000000000000,
+      "hash": "0x33b7c90bab8db5637ee2db96eee241cd9bc8a1d10daad5ea82b23ed3a95de659",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0x33b7c90bab8db5637ee2db96eee241cd9bc8a1d10daad5ea82b23ed3a95de659",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x5A4230B920b18c4AFD3A28F99Eae669B7F2cdC1e": "agree",
+        "0x8D32eb5D0207f7E230C45e7BF0D14B2ED5DA3028": "agree",
+        "0xE52dDB85587585930b1E5f1Fe88fef21CcA49829": "idle",
+        "0xa0435f618c1F27B254998018AEa8Da5C77187852": "idle",
+        "0xf13c3DfE38C8E206C33F750C24a1b043b63Cb810": "agree"
+      },
+      "agree": 3,
+      "total": 5
+    },
+    {
+      "label": "convene jury (starship-flight-8-appeal)",
+      "market_id": "starship-flight-8-appeal",
+      "fn": "resolve_disputed_market",
+      "sender": "0x27a1Ebe0C137F74D3fbdeF8796B3B5Ad7af45aaa",
+      "value_wei": 0,
+      "hash": "0x9a5b61e50e3b452c0e1dbf3b03785d43db763782f2335b96cb4fab7fae771b01",
+      "url": "https://explorer-studio-next.genlayer.com/transactions/0x9a5b61e50e3b452c0e1dbf3b03785d43db763782f2335b96cb4fab7fae771b01",
+      "status": "decided",
+      "result_name": "MAJORITY_AGREE",
+      "exec": "FINISHED_WITH_RETURN",
+      "votes": {
+        "0x5A4230B920b18c4AFD3A28F99Eae669B7F2cdC1e": "agree",
+        "0x8142E5D1b04f84c3cD995C25AAe31B31F8e0379E": "idle",
+        "0xcEf1Baa172d0b4D99Dcc505B36332F26D1088025": "idle",
+        "0xcF5Fd792Df0Dc9d297af75c82B4A0011e8FA1A4A": "agree",
+        "0xcbC79F96B7A275b23EE64d80a98325107F6E1b77": "agree"
+      },
+      "agree": 3,
+      "total": 5
+    }
+  ]
+}

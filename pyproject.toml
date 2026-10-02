@@ -1,0 +1,5 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Each direct-mode test reloads the GenVM SDK (~3s); xdist runs them in parallel.
+# Override with `-n0` for a serial run / debugging.
+addopts = "-n auto -q"

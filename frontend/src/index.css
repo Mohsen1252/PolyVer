@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@theme {
+  --color-carbon: #08090d;
+  --color-panel: #0d0f16;
+  --color-verdict: #6366f1;
+  --color-gavel: #f59e0b;
+  --font-serif: "Newsreader", Georgia, serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+html, body, #root { min-height: 100%; }
+body {
+  background: var(--color-carbon);
+  color: #e2e8f0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    linear-gradient(to right, rgba(30, 41, 59, 0.35) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(30, 41, 59, 0.35) 1px, transparent 1px);
+  background-size: 48px 48px;
+  background-attachment: fixed;
+}
+
+::selection { background: rgba(99, 102, 241, 0.45); }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.55); }
+  70% { box-shadow: 0 0 0 7px rgba(52, 211, 153, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+}
+.live-dot { animation: pulse-ring 1.8s infinite; }
+
+@keyframes glow-amber { 0%,100% { box-shadow: 0 0 0 0 rgba(245,158,11,.0), 0 0 14px rgba(245,158,11,.25);} 50% { box-shadow: 0 0 0 0 rgba(245,158,11,.0), 0 0 22px rgba(245,158,11,.55);} }
+@keyframes glow-red { 0%,100% { box-shadow: 0 0 12px rgba(244,63,94,.25);} 50% { box-shadow: 0 0 22px rgba(244,63,94,.6);} }
+@keyframes glow-green { 0%,100% { box-shadow: 0 0 10px rgba(52,211,153,.2);} 50% { box-shadow: 0 0 18px rgba(52,211,153,.45);} }
+.glow-tentative { animation: glow-amber 2.4s ease-in-out infinite; }
+.glow-disputed { animation: glow-red 1.6s ease-in-out infinite; }
+.glow-finalized { animation: glow-green 3s ease-in-out infinite; }
+
+@keyframes slide-in { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+.slide-in { animation: slide-in .22s ease-out; }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+.fade-in { animation: fade-in .18s ease-out; }
+
+.serif { font-family: var(--font-serif); letter-spacing: -0.01em; }
+.ticker { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
