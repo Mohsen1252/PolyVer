@@ -20,7 +20,7 @@ oracle with a court that lives on [GenLayer](https://genlayer.com):
 
 ```
 contracts/poly_verdict.py   GenVM contract (≈1000 lines)
-tests/                      302 direct-mode pytest tests (in-memory GenVM, no network)
+tests/                      313 direct-mode pytest tests (in-memory GenVM, no network)
 scripts/                    deploy.py · interact_live.py · render_readme.py
 deployments/studio-next.json  address, bytecode SHA-256, every live tx + validator votes
 frontend/                   Vite + React + Tailwind + lucide + viem/genlayer-js "Truth Court" HUD
@@ -35,49 +35,33 @@ frontend/                   Vite + React + Tailwind + lucide + viem/genlayer-js 
 |---|---|
 | Network | GenLayer Studio Next, chain id `61997` (`0xF22D`) |
 | RPC | `https://studio-next.genlayer.com/api` |
-| Contract | [`0xDe42da18A2b03B877D66Fa46289dDD9B0AC9a0B8`](https://explorer-studio-next.genlayer.com/address/0xDe42da18A2b03B877D66Fa46289dDD9B0AC9a0B8) |
+| Contract | [`0xd4D11029d4DA195dCc3342cF4D677c6B1A16E64C`](https://explorer-studio-next.genlayer.com/address/0xd4D11029d4DA195dCc3342cF4D677c6B1A16E64C) |
 | Deployer / governor | `0x27a1Ebe0C137F74D3fbdeF8796B3B5Ad7af45aaa` |
-| Bytecode SHA-256 | `5142568df4d38a675b9d766b597e254b0a19ac796467ffde2a598a57615aa19a` |
+| Bytecode SHA-256 | `cda324d94496a4f1abf5d2862476e30495db95c34c42b46a0bebef2589febb39` |
 | Runner | `py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng` |
-| Deployed | 2026-10-01T20:35:38+00:00 |
-| Deploy tx | [`0x654a2fcd…76aaf7`](https://explorer-studio-next.genlayer.com/transactions/0x654a2fcd5fa49dcd4927ef9cf043cb932b52c056a9597787568a4203a476aaf7) |
+| Deployed | 2026-10-02T11:20:00+00:00 |
+| Deploy tx | [`0x81672b1c…aae667`](https://explorer-studio-next.genlayer.com/transactions/0x81672b1ce546a6d99c85e92bbc7daf971bd2c9ce8dfcf9e9f4c461071caae667) |
 <!-- CONTRACT:END -->
 
 ### Court docket on chain
 
-Read from the contract at README-generation time (`scripts/render_readme.py`):
-
 <!-- CASES:START -->
 | Case | Question | Status | Tentative / final verdict | YES pool | NO pool |
 |---|---|---|---|---|---|
-| #1 `starship-flight-8` | Has SpaceX Starship completed Orbital Test Flight 8? | TENTATIVE_RESOLVED | YES | 0.05 GEN | 0.03 GEN |
-| #2A `fed-100bps-sep-2026` | Did the US Federal Reserve cut rates by 100bps in Sep 2026? | TENTATIVE_RESOLVED | AMBIGUOUS_VOID | 0.05 GEN | 0.03 GEN |
-| #2B `fed-100bps-sep-2026-primary` | Did the US Federal Reserve cut rates by 100bps in Sep 2026? (primary sources) | TENTATIVE_RESOLVED | NO | 0.05 GEN | 0.03 GEN |
-| #3 `country-x-treaty-y-q3` | Did Country X sign Treaty Y by Q3? | TENTATIVE_RESOLVED | AMBIGUOUS_VOID | 0.05 GEN | 0.03 GEN |
-| #4 `boe-cut-sep-2026` | Did the Bank of England cut Bank Rate at its September 2026 meeting? | OPEN | UNRESOLVED | 0.05 GEN | 0.03 GEN |
-| #5 `starship-flight-8-appeal` | Appeal demo: did Starship Flight 8 take place? (challenge game) | FINALIZED | YES | 0.05 GEN | 0.03 GEN |
 
-Accounting invariant on chain (`get_accounting`): `pool_held + locked_bonds + credits_total + vault == total_in - total_out` → **True** (pool_held 0.4792, locked_bonds 0.4, credits 0.2508, vault 0.05 GEN).
+Accounting invariant on chain (`get_accounting`): `pool_held + locked_bonds + credits_total + vault == total_in - total_out` → **True** (pool_held 0, locked_bonds 0, credits 0, vault 0 GEN).
 <!-- CASES:END -->
 
-What the live cases actually demonstrate — and where they differ from a naive expectation:
+**This is the hardened v1.1 deployment (audit fixes below) and its docket is empty until seeded** — run
+`python scripts/interact_live.py seed`. The previous v1.0 contract (`0xDe42da18A2b03B877D66Fa46289dDD9B0AC9a0B8`) was seeded with
+the four brief cases plus a challenge/jury demo and remains the live evidence for those flows; its full transaction record is archived in
+[`deployments/studio-next.v1-seeded.json`](deployments/studio-next.v1-seeded.json). Observed v1.0 results: Case #1 → YES, #2B (Fed primary
+sources) → NO, #2A (calendar/index pages) → AMBIGUOUS_VOID, #3 (placeholder treaty) → AMBIGUOUS_VOID, #4 left OPEN, and the appeal demo:
+proposer VOID overturned to YES by a 7–0 jury with the proposer's bond split 0.05 / 0.05 between challenger and vault.
+Seeded markets have a 24 h challenge window, so they settle only after someone calls `finalize_resolution`.
 
-* **Case #1 (clear YES)** — validators scraped two Wikipedia articles; stances `YES`, consensus reached.
-* **Case #2A / #2B (clear NO)** — run **twice, on purpose.** 2A cites a calendar page and an index page that never state the
-  September decision, so there is no definitive evidence and the contract **fails safe to `AMBIGUOUS_VOID`** — the court
-  refusing to guess is intended. 2B cites the Federal Reserve's own July statement (baseline 3½–3¾), September statement
-  (*raised* ¼ pt to 3¾–4) and implementation note, and resolves **NO**.
-* **Case #3 (ambiguous)** — "Country X / Treaty Y" is a placeholder from the brief, so no whitelisted page can confirm it: the
-  market voids and every bettor can reclaim 100 % of principal. It tests the void path, not a real treaty.
-* **Case #4 (pending trial)** — betting is closed and the market is `OPEN`, ready for the next `propose_resolution`.
-* **Case #5 (appeal demo, an extra market)** — validators proposed `AMBIGUOUS_VOID`; a second account **challenged** with a 0.2 GEN bond;
-  the 7-juror panel ruled `YES` 7–0, **overturning** the proposer: the proposer's 0.1 GEN bond is slashed 0.05 to the challenger and
-  0.05 to the safety vault (the vault shows exactly 0.05 GEN on chain). LLM outcomes are not perfectly repeatable between runs — an
-  earlier run of this same market proposed `YES`; the jury path was exercised either way.
-
-> Each seeded market has a **24 h challenge window** (`challenge_window = 86400`), so Cases #1–#4 (except the pending one) are `TENTATIVE_RESOLVED`
-> right after seeding and become `FINALIZED`/`VOIDED` only once 24 h have passed and someone calls
-> `finalize_resolution`. Run `python scripts/interact_live.py finalize` then `claim` after that.
+The v1.1 changes (`disputed_at`, `void_stale_disputed_market`, source freeze, read quorum) are covered by 313 direct-mode tests; they have **not**
+yet been exercised with live seeded markets.
 
 ### On-chain proofs
 
@@ -88,32 +72,7 @@ is reached, which is normal).
 <!-- PROOFS:START -->
 | # | Action | Market | Consensus | Validators agree | Transaction |
 |---|---|---|---|---|---|
-| 0 | deploy contract | — | — | — | [`0x654a2fcd…76aaf7`](https://explorer-studio-next.genlayer.com/transactions/0x654a2fcd5fa49dcd4927ef9cf043cb932b52c056a9597787568a4203a476aaf7) |
-| 1 | case-1: create market | `starship-flight-8` | MAJORITY_AGREE | 3/5 | [`0x2291c1f4…d1d91c`](https://explorer-studio-next.genlayer.com/transactions/0x2291c1f478f8b3185fb4fb9fea31aefb52aa4be92be8b40a429b11c3d9d1d91c) |
-| 2 | case-2a: create market | `fed-100bps-sep-2026` | MAJORITY_AGREE | 3/5 | [`0xc748f100…30cede`](https://explorer-studio-next.genlayer.com/transactions/0xc748f10094698097f2b970a1dbb3958009ff26bce644961b1c7c4ba09530cede) |
-| 3 | case-2b: create market | `fed-100bps-sep-2026-primary` | MAJORITY_AGREE | 3/5 | [`0xa528600c…d26243`](https://explorer-studio-next.genlayer.com/transactions/0xa528600ce5d074c1bedb0add24fa54633644ff19e20193b7ccbcd5758fd26243) |
-| 4 | case-3: create market | `country-x-treaty-y-q3` | MAJORITY_AGREE | 3/5 | [`0x162d2136…07791c`](https://explorer-studio-next.genlayer.com/transactions/0x162d213619ed4d162741376d2d515a7d031f9918d9148d95fde2aea3c907791c) |
-| 5 | case-4: create market | `boe-cut-sep-2026` | MAJORITY_AGREE | 3/5 | [`0xf53708bf…fe0324`](https://explorer-studio-next.genlayer.com/transactions/0xf53708bf3275da77abb0a50219bcc51cbf591d79b0842e98fbaec24b79fe0324) |
-| 6 | case-5: create market | `starship-flight-8-appeal` | MAJORITY_AGREE | 3/5 | [`0xc263355e…effa1d`](https://explorer-studio-next.genlayer.com/transactions/0xc263355ee441ab170b155dd6c3620bdbdb4c247b1346824e616d5b6b93effa1d) |
-| 7 | case-1: bet YES | `starship-flight-8` | MAJORITY_AGREE | 3/5 | [`0x1dd41771…90a678`](https://explorer-studio-next.genlayer.com/transactions/0x1dd41771e02c94e2a276602f3ba29aa6e46c5884a5dcc26ce1cde67a4190a678) |
-| 8 | case-1: bet NO | `starship-flight-8` | MAJORITY_AGREE | 3/5 | [`0xa220f55e…0c0782`](https://explorer-studio-next.genlayer.com/transactions/0xa220f55e423fdfd2c39fd5ccf757adbf56c55239f7aea8a8c4853da1ea0c0782) |
-| 9 | case-2a: bet YES | `fed-100bps-sep-2026` | MAJORITY_AGREE | 3/5 | [`0xbf05b87b…74e9f4`](https://explorer-studio-next.genlayer.com/transactions/0xbf05b87b8ce16cd6a3b17dacec65590a07644a3cf7b89062fa4026afaf74e9f4) |
-| 10 | case-2a: bet NO | `fed-100bps-sep-2026` | MAJORITY_AGREE | 3/5 | [`0x2bfb4591…a09b49`](https://explorer-studio-next.genlayer.com/transactions/0x2bfb4591da1a2d5478520d7c474d9140f3bdc49d5b81addbb107cd29f0a09b49) |
-| 11 | case-2b: bet YES | `fed-100bps-sep-2026-primary` | MAJORITY_AGREE | 3/5 | [`0x96ef2440…2df784`](https://explorer-studio-next.genlayer.com/transactions/0x96ef24407767055f0cabe064f422a2f5ce9641c844a0c3bc35d258afe22df784) |
-| 12 | case-2b: bet NO | `fed-100bps-sep-2026-primary` | MAJORITY_AGREE | 3/5 | [`0x37a7b27f…d8c4bd`](https://explorer-studio-next.genlayer.com/transactions/0x37a7b27f486f2938adcc660e1eacfdfeaf85ffcaa28c25120d1a96a44dd8c4bd) |
-| 13 | case-3: bet YES | `country-x-treaty-y-q3` | MAJORITY_AGREE | 3/5 | [`0x5e6ff0ed…8d12f1`](https://explorer-studio-next.genlayer.com/transactions/0x5e6ff0edd9eb01c23b7d14f387e66f9fa70580113b3ae698babb9a3ca78d12f1) |
-| 14 | case-3: bet NO | `country-x-treaty-y-q3` | MAJORITY_AGREE | 3/5 | [`0x55a2153e…4dcc3b`](https://explorer-studio-next.genlayer.com/transactions/0x55a2153eed5b29be1f371a79ffc4cd4ec7ac2c4f39f1e598fb4235d9404dcc3b) |
-| 15 | case-4: bet YES | `boe-cut-sep-2026` | MAJORITY_AGREE | 3/5 | [`0x34805828…9a5d7f`](https://explorer-studio-next.genlayer.com/transactions/0x34805828b8710e4401f9acc0b499ff47a09ced58852da4eda915f5f8209a5d7f) |
-| 16 | case-4: bet NO | `boe-cut-sep-2026` | MAJORITY_AGREE | 3/5 | [`0xe681d6c6…7bcba8`](https://explorer-studio-next.genlayer.com/transactions/0xe681d6c66abecb4e43d99cd3949a8b3e8a586dc14264ec2ac0fb394ef87bcba8) |
-| 17 | case-5: bet YES | `starship-flight-8-appeal` | MAJORITY_AGREE | 3/5 | [`0x5268fe34…ab70e1`](https://explorer-studio-next.genlayer.com/transactions/0x5268fe346e93ad90817e2b86ed370e357d0e5edc138d1303922dc5a9afab70e1) |
-| 18 | case-5: bet NO | `starship-flight-8-appeal` | MAJORITY_AGREE | 3/5 | [`0x136e976a…e1323c`](https://explorer-studio-next.genlayer.com/transactions/0x136e976a8ab78284ee9f5dc28f78e3800843305021e0d2202e3936cde1e1323c) |
-| 19 | case-1: propose resolution | `starship-flight-8` | MAJORITY_AGREE | 3/5 | [`0x921f8da8…b19109`](https://explorer-studio-next.genlayer.com/transactions/0x921f8da8b21ad98676ec1208657965648ac6e8860f9bc8abf5b0d5851fb19109) |
-| 20 | case-2a: propose resolution | `fed-100bps-sep-2026` | MAJORITY_AGREE | 3/5 | [`0xe5ec5e30…36324d`](https://explorer-studio-next.genlayer.com/transactions/0xe5ec5e30ca8a075bae84cd8c9d7379d0d6da78771fbeadf1a9331ba7a736324d) |
-| 21 | case-2b: propose resolution | `fed-100bps-sep-2026-primary` | MAJORITY_AGREE | 3/5 | [`0xf9ddb6c7…4bc9ec`](https://explorer-studio-next.genlayer.com/transactions/0xf9ddb6c7d8443ef7fd4df317e9adac3f8f06fe93406ac6d9fc9f6b7e944bc9ec) |
-| 22 | case-3: propose resolution | `country-x-treaty-y-q3` | MAJORITY_AGREE | 3/5 | [`0xd62e7399…2d24a5`](https://explorer-studio-next.genlayer.com/transactions/0xd62e7399b20653ce23d97f417efc2d7dd298056e897347d9aad1d8ad672d24a5) |
-| 23 | case-5: propose resolution | `starship-flight-8-appeal` | MAJORITY_AGREE | 3/5 | [`0xa50903d2…9e0f4e`](https://explorer-studio-next.genlayer.com/transactions/0xa50903d208b1fc33f78d2d18140c10f2ad65a4668e4265ee9d1f547ad49e0f4e) |
-| 24 | challenge verdict (starship-flight-8-appeal) | `starship-flight-8-appeal` | MAJORITY_AGREE | 3/5 | [`0x33b7c90b…5de659`](https://explorer-studio-next.genlayer.com/transactions/0x33b7c90bab8db5637ee2db96eee241cd9bc8a1d10daad5ea82b23ed3a95de659) |
-| 25 | convene jury (starship-flight-8-appeal) | `starship-flight-8-appeal` | MAJORITY_AGREE | 3/5 | [`0x9a5b61e5…771b01`](https://explorer-studio-next.genlayer.com/transactions/0x9a5b61e50e3b452c0e1dbf3b03785d43db763782f2335b96cb4fab7fae771b01) |
+| 0 | deploy contract | — | — | — | [`0x81672b1c…aae667`](https://explorer-studio-next.genlayer.com/transactions/0x81672b1ce546a6d99c85e92bbc7daf971bd2c9ce8dfcf9e9f4c461071caae667) |
 <!-- PROOFS:END -->
 
 ---
@@ -218,6 +177,7 @@ rolled back if queueing raises (`test_failed_transfer_rolls_back_claim`).
 | `claim_payout(id)` | write | pull winnings / full refund |
 | `withdraw_credits()` | write | pull bond returns, slashing rewards, fees |
 | `void_stale_market(id)` | write | 30-day safety valve |
+| `void_stale_disputed_market(id)` | write | voids a market disputed for 7+ days, returns both bonds |
 | `withdraw_vault(to, amount)` | write | governor-only safety-vault withdrawal |
 | `get_market` · `get_jury_verdict` · `can_challenge` · `can_finalize` · `quote_payout` · `get_position` · `get_accounting` · `get_constants` · `credits_of` · `check_url` | view | |
 
@@ -227,7 +187,7 @@ Enums: outcome `UNRESOLVED=0 YES=1 NO=2 AMBIGUOUS_VOID=3`; status `OPEN=0 RESOLV
 ## 6. Running it
 
 ```bash
-# tests — 302 tests, in-memory GenVM, parallel
+# tests — 313 tests, in-memory GenVM, parallel
 uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python genlayer-test==0.30.0rc2 genlayer-py==0.19.0rc2 python-dotenv requests pytest pytest-xdist
 .venv/bin/python -m pytest                 # add -n0 to run serially
 genvm-lint check contracts/poly_verdict.py
@@ -253,10 +213,10 @@ fee manager, so scripts read the live fee policy and pass an explicit fee distri
 <!-- VERIFY:START -->
 | Check | Result |
 |---|---|
-| `pytest` (direct mode) | **302 passed** |
+| `pytest` (direct mode) | **313 passed** |
 | `genvm-lint check contracts/poly_verdict.py` | **Lint passed, validation passed** (24 methods: 13 view, 11 write) |
 | `npm run build` (`tsc -b && vite build`) | **0 TypeScript / bundle errors** |
-| `node frontend/scripts/console-check.mjs` | **PASS — zero console errors** loading the live contract (6 cases, navbar 64 px, Evidence Room + Protocol drawer opened) |
+| `node frontend/scripts/console-check.mjs` | **PASS — zero console errors** loading the live contract (navbar 64 px, Protocol drawer opened; Evidence Room verified on the seeded v1.0 docket) |
 
 ![docket](docs/docket.png)
 ![evidence room](docs/evidence-room.png)
@@ -273,8 +233,15 @@ PolyVerdict reduces — it does not remove — trust. Read these before putting 
   chooses the whitelist and URLs — bettors must vet them *before* staking; a creator can pick sources biased toward an outcome.
 * **Redirects are not observable.** `gl.nondet.web.get` follows redirects but does not expose the final host, so a whitelisted
   URL that redirects off-domain is still read. Validators agree on content, not provenance.
+* **Single unread source rule.** If a market has two or more sources but fewer than two could be read (HTTP 2xx), the verdict falls back to
+  `AMBIGUOUS_VOID`; one surviving page is not trusted to decide a multi-source market. If every failure is transient (5xx/429) the call reverts for retry instead.
+* **Source immutability.** Sources are frozen by the very first prediction (and by `end_timestamp`): `add_source` reverts with
+  `ERR_MARKET_ALREADY_ACTIVE` afterwards, so a creator cannot change evidence once money is at stake. Bettors must vet sources *before* staking.
+* **Stale disputes.** A `DISPUTED` market is voided by anyone after 7 days (`void_stale_disputed_market`); until then only `resolve_disputed_market` can settle it.
 * **Consensus compares outcomes only.** Validators agree if their derived outcome matches; the leader's reasoning text and quotes are
   stored but not individually verified.
+* **Jury implementation (disclosure).** The 7-juror Supreme Court round runs as a *structured multi-perspective prompt* inside the GenVM validator
+  consensus round — it is **not** seven isolated, separately staked validator contracts. See the next bullet for detail.
 * **The "7-juror panel" is one structured LLM call.** The contract cannot choose the validator count (the network sets it). The jury is a
   single prompt in which seven lenses each cast a ballot that the contract tallies deterministically (5-of-7 quorum); independence
   comes from every validator re-executing it, not from seven separate models. Appeals through GenLayer's native appeal rounds are
@@ -286,7 +253,7 @@ PolyVerdict reduces — it does not remove — trust. Read these before putting 
 * **Transfers settle asynchronously.** `emit_transfer(on="finalized")` can fail *after* the enqueue succeeded; the rollback guard only
   covers enqueue-time failures.
 * **Dust and fees.** Division dust (< 1 wei per winner) is never swept; the 1 % fee is not configurable.
-* **Tests run against mocks.** The 302 direct-mode tests exercise leader logic and validator comparison with mocked web/LLM replies.
+* **Tests run against mocks.** The 313 direct-mode tests exercise leader logic and validator comparison with mocked web/LLM replies.
   Real-network behaviour is evidenced only by the live transactions above (which are few and Studio Next is a resettable testnet).
 * **Frontend writes are unverified end-to-end.** Reads were verified against the live contract (zero console errors); the wallet
   paths (`place_prediction`, `challenge_verdict`, …) are implemented against `genlayer-js 2.0.0-rc.1` but were **not** exercised with a real
@@ -295,3 +262,12 @@ PolyVerdict reduces — it does not remove — trust. Read these before putting 
   3,500-char per-source budget on navigation, and the contract cannot render JavaScript-only pages.
 * **Real-world cases depend on what pages said when scraped** and on the clause wording; a clause worded differently can resolve
   differently.
+
+
+## 9. Audit hardening (v1.1)
+
+| Finding | Fix |
+|---|---|
+| Disputed market could lock up forever if nobody convened the jury | `challenge_verdict` stores `disputed_at`; after `DISPUTE_STALE_WINDOW = 7 days` anyone may call `void_stale_disputed_market`: both bonds return to their owners' credits, the market voids and all bettors can claim 100 % principal. Counters (`locked_bonds`, `credits_total`, `pool_held`) stay balanced. |
+| Creator could swap sources after bets were placed | `add_source` reverts with `ERR_MARKET_ALREADY_ACTIVE` once any stake exists or `end_timestamp` has passed. |
+| Single readable source decided multi-source markets | `_derive_outcome`: a market with ≥ 2 sources where fewer than 2 returned HTTP 2xx fails safe to `AMBIGUOUS_VOID`. |

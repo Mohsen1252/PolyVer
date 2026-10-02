@@ -58,7 +58,10 @@ try {
   });
 
   await page.goto(URL_, { waitUntil: "networkidle0", timeout: 60000 });
-  await page.waitForSelector("article", { timeout: 60000 });
+  await page.waitForFunction(
+    () => document.querySelector("article") || document.body.innerText.includes("No cases on the docket yet"),
+    { timeout: 60000 },
+  );
   const cards = await page.$$eval("article", (a) => a.length);
   console.log(`docket loaded: ${cards} case card(s)`);
 
@@ -71,12 +74,16 @@ try {
   await page.screenshot({ path: "screenshots/docket.png" });
 
   // Evidence Room
-  const buttons = await page.$$("article button");
-  await buttons[buttons.length - 1].click();
-  await page.waitForSelector('[aria-label="Evidence Room"]', { timeout: 10000 });
-  await sleep(500);
-  await page.screenshot({ path: "screenshots/evidence-room.png" });
-  await page.keyboard.press("Escape");
+  if (cards > 0) {
+    const buttons = await page.$$("article button");
+    await buttons[buttons.length - 1].click();
+    await page.waitForSelector('[aria-label="Evidence Room"]', { timeout: 10000 });
+    await sleep(500);
+    await page.screenshot({ path: "screenshots/evidence-room.png" });
+    await page.keyboard.press("Escape");
+  } else {
+    console.log("empty docket (no seeded markets): Evidence Room step skipped");
+  }
 
   // Protocol drawer, all tabs
   await page.evaluate(() => [...document.querySelectorAll("button")].find((b) => b.textContent.trim() === "Protocol")?.click());

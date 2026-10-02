@@ -69,6 +69,7 @@ PROPOSER_FEE_BPS = 100  # 1% of the pool, paid to whoever was right
 BPS = 10_000
 JURY_SIZE = 7
 JURY_QUORUM = 5  # supermajority of 7 required for a definitive verdict
+DISPUTE_STALE_WINDOW = 7 * 24 * 3600  # a DISPUTED market nobody convenes a jury for -> anyone may void it
 STALE_VOID_DELAY = 30 * 24 * 3600  # unresolved this long after end -> anyone may void
 MIN_CONFIDENCE = 60
 MAX_SOURCES = 6
@@ -233,16 +234,19 @@ def _parse_json(raw) -> dict:
     return out
 
 
-def _derive_outcome(stances: list, llm_outcome: str, confidence: int) -> tuple:
+def _derive_outcome(stances: list, llm_outcome: str, confidence: int, total_sources: int = 0) -> tuple:
     """Deterministic verdict from per-source stances. Returns (outcome, conflict).
 
     * any YES alongside any NO              -> conflict -> VOID
     * no definitive stance at all           -> VOID
+    * market has >= 2 sources but < 2 were read (HTTP 2xx) -> VOID (read quorum)
     * fewer than min(2, readable) definitive-> VOID (lack of confirmation)
     * LLM overall verdict disagrees with the unanimous stance, or confidence is
       below MIN_CONFIDENCE                  -> VOID
     """
     n = len(stances)
+    if total_sources >= 2 and n < 2:
+        return OUTCOME_AMBIGUOUS_VOID, False  # multi-source market lost its read quorum
     yes = sum(1 for s in stances if s == "YES")
     no = sum(1 for s in stances if s == "NO")
     if yes > 0 and no > 0:
@@ -398,6 +402,7 @@ class Market:
     claimed_total: u256
     resolved_at: u256
     challenge_window: u256
+    disputed_at: u256
 
 
 class PolyVerdict(gl.contract.Contract):
@@ -516,6 +521,7 @@ class PolyVerdict(gl.contract.Contract):
             "jury_quorum": JURY_QUORUM,
             "min_confidence": MIN_CONFIDENCE,
             "stale_void_delay": STALE_VOID_DELAY,
+            "dispute_stale_window": DISPUTE_STALE_WINDOW,
             "governor": self.governor.as_hex.lower(),
         }
 
@@ -595,6 +601,7 @@ class PolyVerdict(gl.contract.Contract):
             claimed_total=0,
             resolved_at=0,
             challenge_window=DEFAULT_CHALLENGE_WINDOW,
+            disputed_at=0,
         )
         self.market_ids.append(mid)
 
@@ -606,6 +613,8 @@ class PolyVerdict(gl.contract.Contract):
             _fail("only the market creator may add sources")
         if int(m.status) != STATUS_OPEN:
             _fail("market not open")
+        if int(m.yes_pool) + int(m.no_pool) > 0 or self._now() >= int(m.end_timestamp):
+            _fail("ERR_MARKET_ALREADY_ACTIVE: cannot modify sources once bets are placed or market expired")
         roots = json.loads(m.whitelist_json)
         urls = json.loads(m.sources_json)
         url = url.strip()
@@ -685,6 +694,7 @@ class PolyVerdict(gl.contract.Contract):
         m.status = STATUS_DISPUTED
         m.dispute_challenger = who
         m.challenge_bond = value
+        m.disputed_at = self._now()
         self.markets[market_id] = m
         self.total_in = int(self.total_in) + value
         self.locked_bonds = int(self.locked_bonds) + value
@@ -745,6 +755,26 @@ class PolyVerdict(gl.contract.Contract):
             _fail("market not open")
         if self._now() < int(m.end_timestamp) + STALE_VOID_DELAY:
             _fail("market not stale yet")
+        m.final_verdict = OUTCOME_AMBIGUOUS_VOID
+        self._settle(m, OUTCOME_AMBIGUOUS_VOID, "")
+        self.markets[market_id] = m
+
+    @gl.public.write
+    def void_stale_disputed_market(self, market_id: str) -> None:
+        """Safety valve: a DISPUTED market whose jury was not convened for 7 days is voided.
+        Both bonds are returned to their owners' credits and every bettor is refunded."""
+        m = self._must_market(market_id)
+        if int(m.status) != STATUS_DISPUTED:
+            _fail("market not disputed")
+        if self._now() < int(m.disputed_at) + DISPUTE_STALE_WINDOW:
+            _fail("dispute not stale yet")
+        proposer_bond = int(m.resolution_bond)
+        challenger_bond = int(m.challenge_bond)
+        self.locked_bonds = int(self.locked_bonds) - proposer_bond - challenger_bond
+        m.resolution_bond = 0
+        m.challenge_bond = 0
+        self._credit(m.tentative_resolver, proposer_bond)
+        self._credit(m.dispute_challenger, challenger_bond)
         m.final_verdict = OUTCOME_AMBIGUOUS_VOID
         self._settle(m, OUTCOME_AMBIGUOUS_VOID, "")
         self.markets[market_id] = m
@@ -851,7 +881,7 @@ class PolyVerdict(gl.contract.Contract):
                     }
             stances = [by_url[e["url"]]["stance"] if e["url"] in by_url else "UNCLEAR" for e in readable]
             confidence = max(0, min(100, _coerce_int(data.get("confidence"), 0)))
-            outcome, conflict = _derive_outcome(stances, str(data.get("outcome", "")), confidence)
+            outcome, conflict = _derive_outcome(stances, str(data.get("outcome", "")), confidence, len(evidence))
             return {
                 "outcome": outcome,
                 "confidence": confidence,
@@ -995,6 +1025,7 @@ class PolyVerdict(gl.contract.Contract):
             "claimed_total": int(m.claimed_total),
             "resolved_at": int(m.resolved_at),
             "challenge_window": int(m.challenge_window),
+            "disputed_at": int(m.disputed_at),
         }
 
     def _must_market(self, market_id: str) -> Market:
