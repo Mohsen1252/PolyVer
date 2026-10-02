@@ -107,3 +107,85 @@ def test_two_readable_of_three_sources_still_resolves(env):
     env.after_end()
     env.call(env.charlie, env.c.propose_resolution, "m1", value=RES_BOND)
     assert env.market()["proposed_outcome"] == YES
+
+
+# ---------------------------------------------------- domain-level quorum (v1.2)
+def test_jury_fallback_to_void_when_readable_sources_under_quorum(env):
+    env.create()
+    env.bet(env.alice, YES, 3 * GEN)
+    env.propose()
+    env.challenge()
+    env.vm.clear_mocks()
+    env.web_status("apnews.com", 404)
+    env.web_status("bbc.com", 404)
+    env.web_ok()
+    env.jury_as(["YES"] * 7)  # a unanimous jury must NOT be able to decide on one readable domain
+    env.call(env.owner, env.c.resolve_disputed_market, "m1")
+    j = env.c.get_jury_verdict("m1")
+    assert env.market()["final_verdict"] == VOID and j["void"] == 7
+    assert env.market()["status"] == VOIDED
+
+
+def test_jury_with_two_readable_domains_may_still_decide(env):
+    env.create()
+    env.bet(env.alice, YES, 3 * GEN)
+    env.propose()
+    env.challenge()
+    env.vm.clear_mocks()
+    env.web_status("bbc.com", 404)
+    env.web_ok()
+    env.dispute_resolved(["YES"] * 7)
+    assert env.market()["final_verdict"] == YES
+
+
+def test_same_domain_multiple_urls_do_not_satisfy_multi_source_quorum(env):
+    env.create(whitelist=["reuters.com", "apnews.com"],
+               urls=["https://www.reuters.com/a", "https://www.reuters.com/b", "https://apnews.com/c"])
+    env.web_status("apnews.com", 404)
+    env.web_ok()
+    env.adjudicate_as(["YES", "YES"], outcome="YES", confidence=99)  # two readable URLs, ONE domain
+    env.after_end()
+    env.call(env.charlie, env.c.propose_resolution, "m1", value=RES_BOND)
+    assert env.market()["proposed_outcome"] == VOID
+
+
+def test_same_domain_urls_cannot_corroborate_each_other(env):
+    """Two definitive pages on one domain count once when another domain was read."""
+    env.create(whitelist=["reuters.com", "apnews.com"],
+               urls=["https://www.reuters.com/a", "https://www.reuters.com/b", "https://apnews.com/c"])
+    env.web_ok()
+    env.adjudicate_as(["YES", "YES", "UNCLEAR"], outcome="YES", confidence=99)
+    env.after_end()
+    env.call(env.charlie, env.c.propose_resolution, "m1", value=RES_BOND)
+    assert env.market()["proposed_outcome"] == VOID
+
+
+def test_two_distinct_domains_corroborate(env):
+    env.create(whitelist=["reuters.com", "apnews.com"],
+               urls=["https://www.reuters.com/a", "https://www.reuters.com/b", "https://apnews.com/c"])
+    env.web_ok()
+    env.adjudicate_as(["YES", "UNCLEAR", "YES"], outcome="YES", confidence=99)
+    env.after_end()
+    env.call(env.charlie, env.c.propose_resolution, "m1", value=RES_BOND)
+    assert env.market()["proposed_outcome"] == YES
+
+
+def test_single_domain_market_resolves_on_one_definitive_domain(env):
+    env.create(whitelist=["federalreserve.gov"],
+               urls=["https://www.federalreserve.gov/a", "https://www.federalreserve.gov/b"])
+    env.vm.mock_web(r"federalreserve\.gov", {"status": 200, "body": "<p>" + "The Committee decided. " * 20 + "</p>"})
+    env.adjudicate_as(["YES", "UNCLEAR"], outcome="YES", confidence=99)
+    env.after_end()
+    env.call(env.charlie, env.c.propose_resolution, "m1", value=RES_BOND)
+    assert env.market()["proposed_outcome"] == YES
+
+
+def test_www_and_bare_host_are_one_domain(env):
+    env.create(whitelist=["reuters.com", "apnews.com"],
+               urls=["https://www.reuters.com/a", "https://reuters.com/b", "https://apnews.com/c"])
+    env.web_status("apnews.com", 404)
+    env.web_ok()
+    env.adjudicate_as(["YES", "YES"], outcome="YES", confidence=99)
+    env.after_end()
+    env.call(env.charlie, env.c.propose_resolution, "m1", value=RES_BOND)
+    assert env.market()["proposed_outcome"] == VOID

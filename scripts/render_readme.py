@@ -40,7 +40,7 @@ def contract_block(d: dict) -> str:
         f"| Deployer / governor | `{d['deployer']}` |",
         f"| Bytecode SHA-256 | `{d['bytecode_sha256']}` |",
         f"| Runner | `{d['runner']}` |",
-        f"| Deployed | {d['deployed_at']} |",
+        f"| Deployed | {d["deployed_at"]} (ISO-8601 UTC, deploy.py clock) |",
         f"| Deploy tx | [{short(d['deploy_tx']['hash'])}]({d['deploy_tx']['url']}) |",
     ])
 

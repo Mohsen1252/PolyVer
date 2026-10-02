@@ -234,25 +234,41 @@ def _parse_json(raw) -> dict:
     return out
 
 
-def _derive_outcome(stances: list, llm_outcome: str, confidence: int, total_sources: int = 0) -> tuple:
+def _domain_of(url: str) -> str:
+    """Distinct-domain key for quorum counting: lower-cased host without a leading www."""
+    try:
+        host = (urlsplit(url).hostname or "").lower().rstrip(".")
+    except Exception:
+        return ""
+    return host[4:] if host.startswith("www.") else host
+
+
+def _distinct_domains(urls: list) -> int:
+    return len({_domain_of(u) for u in urls})
+
+
+def _derive_outcome(stances: list, llm_outcome: str, confidence: int, domains: list = None, total_domains: int = 0) -> tuple:
     """Deterministic verdict from per-source stances. Returns (outcome, conflict).
 
     * any YES alongside any NO              -> conflict -> VOID
     * no definitive stance at all           -> VOID
-    * market has >= 2 sources but < 2 were read (HTTP 2xx) -> VOID (read quorum)
-    * fewer than min(2, readable) definitive-> VOID (lack of confirmation)
+    * market spans >= 2 distinct domains but < 2 distinct domains were read (HTTP 2xx) -> VOID
+    * fewer than min(2, readable domains) domains with a definitive stance -> VOID
     * LLM overall verdict disagrees with the unanimous stance, or confidence is
       below MIN_CONFIDENCE                  -> VOID
     """
-    n = len(stances)
-    if total_sources >= 2 and n < 2:
-        return OUTCOME_AMBIGUOUS_VOID, False  # multi-source market lost its read quorum
+    if domains is None:
+        domains = [str(i) for i in range(len(stances))]
+    readable_domains = len(set(domains))
+    if total_domains >= 2 and readable_domains < 2:
+        return OUTCOME_AMBIGUOUS_VOID, False  # multi-domain market lost its read quorum
     yes = sum(1 for s in stances if s == "YES")
     no = sum(1 for s in stances if s == "NO")
     if yes > 0 and no > 0:
         return OUTCOME_AMBIGUOUS_VOID, True
     definitive = yes + no
-    if n == 0 or definitive == 0 or definitive < min(2, n):
+    definitive_domains = len({d for d, st in zip(domains, stances) if st != "UNCLEAR"})
+    if readable_domains == 0 or definitive == 0 or definitive_domains < min(2, readable_domains):
         return OUTCOME_AMBIGUOUS_VOID, False
     if confidence < MIN_CONFIDENCE:
         return OUTCOME_AMBIGUOUS_VOID, False
@@ -881,7 +897,10 @@ class PolyVerdict(gl.contract.Contract):
                     }
             stances = [by_url[e["url"]]["stance"] if e["url"] in by_url else "UNCLEAR" for e in readable]
             confidence = max(0, min(100, _coerce_int(data.get("confidence"), 0)))
-            outcome, conflict = _derive_outcome(stances, str(data.get("outcome", "")), confidence, len(evidence))
+            outcome, conflict = _derive_outcome(
+                stances, str(data.get("outcome", "")), confidence,
+                [_domain_of(e["url"]) for e in readable], _distinct_domains(urls),
+            )
             return {
                 "outcome": outcome,
                 "confidence": confidence,
@@ -910,6 +929,9 @@ class PolyVerdict(gl.contract.Contract):
                     raise gl.vm.UserError(f"{ERR_TRANSIENT} sources temporarily unavailable")
                 votes = ["VOID"] * JURY_SIZE
                 return _jury_result(votes, [""] * JURY_SIZE, "No readable evidence; panel voids.", evidence)
+            if _distinct_domains(urls) >= 2 and len({_domain_of(e["url"]) for e in readable}) < 2:
+                votes = ["VOID"] * JURY_SIZE
+                return _jury_result(votes, [""] * JURY_SIZE, "Read quorum not met (fewer than 2 distinct domains readable); panel voids.", evidence)
             lenses = "\n".join(f"  juror {i + 1}: {lens}" for i, lens in enumerate(JURY_LENSES))
             prompt = (
                 "PV-JURY. You convene a panel of 7 independent jurors reviewing a CONTESTED "
