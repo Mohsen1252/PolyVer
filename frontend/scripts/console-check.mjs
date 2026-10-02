@@ -85,6 +85,20 @@ try {
     console.log("empty docket (no seeded markets): Evidence Room step skipped");
   }
 
+  // Create Prediction Trial modal
+  await page.evaluate(() => [...document.querySelectorAll("button")].find((b) => b.textContent.includes("Create Prediction Trial"))?.click());
+  await page.waitForSelector('[aria-label="Create Prediction Trial"]', { timeout: 5000 });
+  await page.screenshot({ path: "screenshots/create-modal.png" });
+  await page.keyboard.press("Escape");
+  // Disconnected wallet: every card action must be disabled and explain why
+  if (cards > 0) {
+    const bad = await page.$$eval("article button[aria-disabled]", (bs) =>
+      bs.filter((b) => !b.disabled || !b.closest("span")?.title.includes("61997")).length);
+    const total = await page.$$eval("article button[aria-disabled]", (bs) => bs.length);
+    console.log(`card action buttons: ${total}, mis-configured: ${bad}`);
+    if (total === 0 || bad > 0) problems.push("card actions not disabled with a connect-wallet tooltip");
+  }
+
   // Protocol drawer, all tabs
   await page.evaluate(() => [...document.querySelectorAll("button")].find((b) => b.textContent.trim() === "Protocol")?.click());
   await page.waitForSelector('[role="tablist"]', { timeout: 5000 });

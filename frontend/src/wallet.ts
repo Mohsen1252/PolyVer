@@ -17,7 +17,7 @@ export type Wallet = {
   error: string | null;
   connect: () => Promise<void>;
   disconnect: () => void;
-  send: (fn: string, args: (string | number)[], value?: bigint) => Promise<string>;
+  send: (fn: string, args: unknown[], value?: bigint) => Promise<string>;
 };
 
 async function ensureChain(p: Eip1193): Promise<void> {
@@ -79,7 +79,7 @@ export function useWallet(): Wallet {
   }, []);
 
   const send = useCallback(
-    async (fn: string, args: (string | number)[], value = 0n) => {
+    async (fn: string, args: unknown[], value = 0n) => {
       const p = eth();
       if (!p || !address) throw new Error("Connect a wallet first");
       await ensureChain(p);

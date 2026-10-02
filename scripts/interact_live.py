@@ -229,6 +229,9 @@ def cmd_seed(ct: Court):
         c.save_deployment(ct.dep)
     for case in CASES:
         m = ct.market(case["id"])
+        if c.chain_now() >= m["end_timestamp"]:
+            print(f"{case['id']}: betting window closed, skipping stakes")
+            continue
         if int(m["yes_pool"]) == 0:
             ct.send(ct.a, "place_prediction", [case["id"], 1], value=STAKE_YES, label=f"{case['key']}: bet YES")
         if int(m["no_pool"]) == 0:

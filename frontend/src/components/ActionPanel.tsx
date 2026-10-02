@@ -28,6 +28,7 @@ export function ChallengeCountdown({ market, wallet, onDone, compact }: Props) {
       <div className="mt-2 h-1 overflow-hidden rounded bg-slate-800">
         <div className="h-full bg-gavel transition-all" style={{ width: `${pct}%` }} />
       </div>
+      {!compact && (
       <div className="mt-3">
         {open ? (
           <button
@@ -50,6 +51,7 @@ export function ChallengeCountdown({ market, wallet, onDone, compact }: Props) {
         )}
         <ActionStatus run={run} />
       </div>
+      )}
     </div>
   );
 }
@@ -160,16 +162,16 @@ export function ActionPanel({ market, wallet, onDone }: Props) {
   return null;
 }
 
-function parseGen(v: string): bigint | null {
+export function parseGen(v: string): bigint | null {
   if (!/^\d+(\.\d{1,18})?$/.test(v.trim())) return null;
   const [w, f = ""] = v.trim().split(".");
   const wei = BigInt(w) * 10n ** 18n + BigInt(f.padEnd(18, "0"));
   return wei > 0n ? wei : null;
 }
 
-type Run = ReturnType<typeof useAction>;
+export type Run = ReturnType<typeof useAction>;
 
-function useAction(wallet: Wallet, onDone: () => void) {
+export function useAction(wallet: Wallet, onDone: () => void) {
   const [busy, setBusy] = useState(false);
   const [hash, setHash] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -177,7 +179,7 @@ function useAction(wallet: Wallet, onDone: () => void) {
     busy,
     hash,
     err,
-    async go(fn: string, args: (string | number)[], value = 0n) {
+    async go(fn: string, args: unknown[], value = 0n) {
       setErr(null);
       setHash(null);
       if (!wallet.address) {
@@ -198,7 +200,7 @@ function useAction(wallet: Wallet, onDone: () => void) {
   };
 }
 
-function ActionStatus({ run }: { run: Run }) {
+export function ActionStatus({ run }: { run: Run }) {
   if (run.err)
     return (
       <p className="mt-2 flex items-start gap-1.5 text-xs text-rose-300">

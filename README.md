@@ -48,8 +48,14 @@ frontend/                   Vite + React + Tailwind + lucide + viem/genlayer-js 
 <!-- CASES:START -->
 | Case | Question | Status | Tentative / final verdict | YES pool | NO pool |
 |---|---|---|---|---|---|
+| #1 `starship-flight-8` | Has SpaceX Starship completed Orbital Test Flight 8? | TENTATIVE_RESOLVED | YES | 0.05 GEN | 0.03 GEN |
+| #2A `fed-100bps-sep-2026` | Did the US Federal Reserve cut rates by 100bps in Sep 2026? | TENTATIVE_RESOLVED | AMBIGUOUS_VOID | 0.05 GEN | 0.03 GEN |
+| #2B `fed-100bps-sep-2026-primary` | Did the US Federal Reserve cut rates by 100bps in Sep 2026? (primary sources) | TENTATIVE_RESOLVED | NO | 0.05 GEN | 0.03 GEN |
+| #3 `country-x-treaty-y-q3` | Did Country X sign Treaty Y by Q3? | TENTATIVE_RESOLVED | AMBIGUOUS_VOID | 0.05 GEN | 0.03 GEN |
+| #4 `boe-cut-sep-2026` | Did the Bank of England cut Bank Rate at its September 2026 meeting? | OPEN | UNRESOLVED | 0.05 GEN | 0.03 GEN |
+| #5 `starship-flight-8-appeal` | Appeal demo: did Starship Flight 8 take place? (challenge game) | FINALIZED | YES | 0.05 GEN | 0 GEN |
 
-Accounting invariant on chain (`get_accounting`): `pool_held + locked_bonds + credits_total + vault == total_in - total_out` → **True** (pool_held 0, locked_bonds 0, credits 0, vault 0 GEN).
+Accounting invariant on chain (`get_accounting`): `pool_held + locked_bonds + credits_total + vault == total_in - total_out` → **True** (pool_held 0.4495, locked_bonds 0.4, credits 0.2005, vault 0.1 GEN).
 <!-- CASES:END -->
 
 **This is the hardened v1.1 deployment (audit fixes below) and its docket is empty until seeded** — run
@@ -73,6 +79,33 @@ is reached, which is normal).
 | # | Action | Market | Consensus | Validators agree | Transaction |
 |---|---|---|---|---|---|
 | 0 | deploy contract | — | — | — | [`0x81672b1c…aae667`](https://explorer-studio-next.genlayer.com/transactions/0x81672b1ce546a6d99c85e92bbc7daf971bd2c9ce8dfcf9e9f4c461071caae667) |
+| 1 | case-1: create market | `starship-flight-8` | MAJORITY_AGREE | 3/5 | [`0x5b7f0404…c12389`](https://explorer-studio-next.genlayer.com/transactions/0x5b7f0404b4e0f2f9903fb86fbf8723f50454691d06010a90a8199b3e39c12389) |
+| 2 | case-2a: create market | `fed-100bps-sep-2026` | MAJORITY_AGREE | 3/5 | [`0xa9e38ad2…fbb32b`](https://explorer-studio-next.genlayer.com/transactions/0xa9e38ad2f8e23ab5177a214a121c9da80219e566c7a03e7a5ec444192afbb32b) |
+| 3 | case-2b: create market | `fed-100bps-sep-2026-primary` | MAJORITY_AGREE | 3/5 | [`0x04d26300…6f15b2`](https://explorer-studio-next.genlayer.com/transactions/0x04d263008647afe4cdfa47b5c38e6247c6e94657056f5e0104248e1c9f6f15b2) |
+| 4 | case-3: create market | `country-x-treaty-y-q3` | MAJORITY_AGREE | 3/5 | [`0x65849211…4c26d0`](https://explorer-studio-next.genlayer.com/transactions/0x65849211f4d03502dd9d70b48c4f1753219f3c52f42a5af767346a5d484c26d0) |
+| 5 | case-4: create market | `boe-cut-sep-2026` | MAJORITY_AGREE | 3/5 | [`0x96dee3d2…827908`](https://explorer-studio-next.genlayer.com/transactions/0x96dee3d2ae4c7c1ec3e9cab268bd8ad71f2823176285863e08b7d34fd2827908) |
+| 6 | case-5: create market | `starship-flight-8-appeal` | MAJORITY_AGREE | 3/5 | [`0x75aeec4f…58e817`](https://explorer-studio-next.genlayer.com/transactions/0x75aeec4ff6e7661ec8ec491ad7c675362cbb1660b4d6c9a6f2becc414c58e817) |
+| 7 | case-1: bet YES | `starship-flight-8` | MAJORITY_AGREE | 3/5 | [`0xa4f45017…c241d8`](https://explorer-studio-next.genlayer.com/transactions/0xa4f45017587ffd27b50885d059ffb58cf857fe340e7a068e4e9cd15271c241d8) |
+| 8 | case-1: bet NO | `starship-flight-8` | MAJORITY_AGREE | 3/5 | [`0xc342f393…89a4f2`](https://explorer-studio-next.genlayer.com/transactions/0xc342f393e978fb3040e6777b3532180f42a259a93395ce53e77333b5a089a4f2) |
+| 9 | case-2a: bet YES | `fed-100bps-sep-2026` | MAJORITY_AGREE | 3/5 | [`0x2adfe487…2f7acc`](https://explorer-studio-next.genlayer.com/transactions/0x2adfe487144bbad990fbffa21d01a9c10f21e81784a564ef4799d3a3a12f7acc) |
+| 10 | case-2a: bet NO | `fed-100bps-sep-2026` | MAJORITY_AGREE | 3/5 | [`0x2bae94f9…7bf52e`](https://explorer-studio-next.genlayer.com/transactions/0x2bae94f90e6098d1d02acf6c428c84e30ecd65ac0a3ce596d9da7813927bf52e) |
+| 11 | case-2b: bet YES | `fed-100bps-sep-2026-primary` | MAJORITY_AGREE | 3/5 | [`0x58d88f36…e343cb`](https://explorer-studio-next.genlayer.com/transactions/0x58d88f36fe79224deb57ddc22c14f18b3cf2fc00333ccdb4ba33443447e343cb) |
+| 12 | case-2b: bet NO | `fed-100bps-sep-2026-primary` | MAJORITY_AGREE | 3/5 | [`0x6d6994a7…0dd5b8`](https://explorer-studio-next.genlayer.com/transactions/0x6d6994a736e06d90ecd35ec90e0c50d3783e3b57e98918c00d175daafb0dd5b8) |
+| 13 | case-3: bet YES | `country-x-treaty-y-q3` | MAJORITY_AGREE | 3/5 | [`0x0c862cbb…6625f3`](https://explorer-studio-next.genlayer.com/transactions/0x0c862cbb96629c4bd5eab48e0ce37a0c370a1ec379ced831deb6c2a5c56625f3) |
+| 14 | case-3: bet NO | `country-x-treaty-y-q3` | MAJORITY_AGREE | 3/5 | [`0xc3b0d214…a5bee6`](https://explorer-studio-next.genlayer.com/transactions/0xc3b0d2148413f90c1fca38f3a75d2b50c13e1bf0ef58fc578b09735715a5bee6) |
+| 15 | case-4: bet YES | `boe-cut-sep-2026` | MAJORITY_AGREE | 3/5 | [`0x8a67c1b1…4c3c60`](https://explorer-studio-next.genlayer.com/transactions/0x8a67c1b1ba05cb922e2d19636ef85c3253794f431d4781aa729919ee294c3c60) |
+| 16 | case-4: bet NO | `boe-cut-sep-2026` | MAJORITY_AGREE | 3/5 | [`0xca588015…7b6f67`](https://explorer-studio-next.genlayer.com/transactions/0xca588015cf6c5587bb7f2f832e1d870d6c2e77c34ac86339fa8b1946057b6f67) |
+| 17 | case-5: bet YES | `starship-flight-8-appeal` | MAJORITY_AGREE | 3/5 | [`0xca1d90e6…074a5b`](https://explorer-studio-next.genlayer.com/transactions/0xca1d90e644e4c60c8c9a462568afc85295263c09c469b23dc29aa968da074a5b) |
+| 18 | case-5: bet NO | `starship-flight-8-appeal` | MAJORITY_AGREE | 3/5 | [`0xd8afe18b…96fe30`](https://explorer-studio-next.genlayer.com/transactions/0xd8afe18b82725d78548830b987db12f1de891941166353c8971ecf78dd96fe30) |
+| 19 | case-1: propose resolution | `starship-flight-8` | MAJORITY_DISAGREE | 0/5 | [`0xfd6c7399…666c30`](https://explorer-studio-next.genlayer.com/transactions/0xfd6c739945658d5f2e22075b82a8e679cbe769ddb61844c92468a38710666c30) |
+| 20 | case-1: propose resolution | `starship-flight-8` | MAJORITY_DISAGREE | 0/5 | [`0x14c4213d…1a92e7`](https://explorer-studio-next.genlayer.com/transactions/0x14c4213d15d6d52982e131377beadcc2c9a30986766f55b578e7f102511a92e7) |
+| 21 | case-1: propose resolution | `starship-flight-8` | MAJORITY_AGREE | 3/5 | [`0x13f606e9…de6c39`](https://explorer-studio-next.genlayer.com/transactions/0x13f606e9bd96bddd90f2f2edaa354355edc50da541b036f3c9d6a0873fde6c39) |
+| 22 | case-2a: propose resolution | `fed-100bps-sep-2026` | MAJORITY_AGREE | 3/5 | [`0x24fba309…ae3a70`](https://explorer-studio-next.genlayer.com/transactions/0x24fba309f016a5af1f98b7901dc8878c29976bc8ca380cdd1e5d93afb2ae3a70) |
+| 23 | case-2b: propose resolution | `fed-100bps-sep-2026-primary` | MAJORITY_AGREE | 3/5 | [`0x55ee6273…f0363a`](https://explorer-studio-next.genlayer.com/transactions/0x55ee6273a44306a8e296206c1e58bc146f90d8bcdba910607d15834b18f0363a) |
+| 24 | case-3: propose resolution | `country-x-treaty-y-q3` | MAJORITY_AGREE | 3/5 | [`0xe41c95d0…5b9eda`](https://explorer-studio-next.genlayer.com/transactions/0xe41c95d067194cf969e7fab1c2df5fa86e43395fc0b287e74581751c335b9eda) |
+| 25 | case-5: propose resolution | `starship-flight-8-appeal` | MAJORITY_AGREE | 3/5 | [`0xc15370f9…d5d4db`](https://explorer-studio-next.genlayer.com/transactions/0xc15370f9b1f8f2bdb3401dfcb736d2f509d83a69f2ad7223410bd72236d5d4db) |
+| 26 | challenge verdict (starship-flight-8-appeal) | `starship-flight-8-appeal` | MAJORITY_AGREE | 3/5 | [`0x76b61bb8…eb51d0`](https://explorer-studio-next.genlayer.com/transactions/0x76b61bb8986aeb195e609c849d0c161a024c27c4450e9d0d731927061feb51d0) |
+| 27 | convene jury (starship-flight-8-appeal) | `starship-flight-8-appeal` | MAJORITY_AGREE | 3/5 | [`0xc0557060…03389d`](https://explorer-studio-next.genlayer.com/transactions/0xc05570609616dda40613cdf21675e2dde0336ea163152094fc4093782303389d) |
 <!-- PROOFS:END -->
 
 ---

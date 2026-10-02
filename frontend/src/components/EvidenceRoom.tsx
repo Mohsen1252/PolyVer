@@ -35,7 +35,7 @@ export function EvidenceRoom({ market: m, jury, wallet, onClose, onRefresh }: Pr
         <header className="flex flex-nowrap items-start justify-between gap-4 border-b border-slate-800 px-5 py-4 sm:px-7">
           <div className="min-w-0">
             <div className="ticker flex flex-wrap items-center gap-3 text-[11px] tracking-widest text-slate-500">
-              EVIDENCE ROOM · {m.market_id} <StatusBadge status={m.status_name} />
+              EVIDENCE ROOM · {m.market_id} <StatusBadge status={m.status_name} finalVerdict={m.final_verdict} />
             </div>
             <h2 className="serif mt-2 text-2xl leading-tight text-slate-100">{m.title}</h2>
           </div>

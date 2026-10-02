@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { AlertTriangle, Landmark, Loader2, RefreshCw, Scale, ShieldCheck } from "lucide-react";
-import { loadCourt } from "./api";
+import { AlertTriangle, Gavel, Landmark, Loader2, RefreshCw, Scale, ShieldCheck } from "lucide-react";
+import { cachedCourt, loadCourt } from "./api";
 import { CONTRACT_ADDRESS, CONTRACT_URL } from "./chain";
 import { CaseCard } from "./components/CaseCard";
 import { EvidenceRoom } from "./components/EvidenceRoom";
 import { Navbar } from "./components/Navbar";
+import { CreateMarketModal } from "./components/CreateMarketModal";
 import { ProtocolDrawer } from "./components/ProtocolDrawer";
 import { caseRank, fmtGen, shortAddr } from "./lib";
 import type { CourtData } from "./types";
@@ -12,11 +13,12 @@ import { useWallet } from "./wallet";
 
 export default function App() {
   const wallet = useWallet();
-  const [data, setData] = useState<CourtData | null>(null);
+  const [data, setData] = useState<CourtData | null>(() => cachedCourt());
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<string | null>(null);
   const [protocol, setProtocol] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -59,6 +61,13 @@ export default function App() {
 
         <div className="mb-5 flex flex-nowrap items-center justify-between gap-3">
           <h2 className="serif whitespace-nowrap text-2xl text-slate-100">Active Cases Dossier</h2>
+          <div className="flex flex-nowrap items-center gap-2">
+          <button
+            onClick={() => setCreating(true)}
+            className="inline-flex items-center gap-2 whitespace-nowrap rounded-md bg-verdict px-4 py-2 text-sm font-semibold text-white shadow-[0_0_24px_rgba(99,102,241,0.35)] transition hover:bg-indigo-400"
+          >
+            <Gavel size={14} aria-hidden /> Create Prediction Trial
+          </button>
           <button
             onClick={() => void refresh()}
             disabled={loading}
@@ -66,6 +75,7 @@ export default function App() {
           >
             <RefreshCw size={12} className={loading ? "animate-spin" : ""} aria-hidden /> Refresh
           </button>
+          </div>
         </div>
 
         {error && (
@@ -86,7 +96,7 @@ export default function App() {
             {[...(data?.markets ?? [])]
               .sort((a, b) => caseRank(a.market_id).localeCompare(caseRank(b.market_id)))
               .map((m) => (
-              <CaseCard key={m.market_id} market={m} wallet={wallet} onOpen={() => setSelected(m.market_id)} onRefresh={refresh} />
+              <CaseCard key={m.market_id} market={m} jury={data?.juries[m.market_id]} wallet={wallet} onOpen={() => setSelected(m.market_id)} onRefresh={refresh} />
             ))}
           </div>
         )}
@@ -108,6 +118,7 @@ export default function App() {
           onRefresh={refresh}
         />
       )}
+      {creating && <CreateMarketModal wallet={wallet} onClose={() => setCreating(false)} onDone={() => { setCreating(false); void refresh(); }} />}
       <ProtocolDrawer open={protocol} onClose={() => setProtocol(false)} />
     </div>
   );
