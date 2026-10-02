@@ -20,7 +20,7 @@ oracle with a court that lives on [GenLayer](https://genlayer.com):
 
 ```
 contracts/poly_verdict.py   GenVM contract (≈1000 lines)
-tests/                      313 direct-mode pytest tests (in-memory GenVM, no network)
+tests/                      320 direct-mode pytest tests (in-memory GenVM, no network)
 scripts/                    deploy.py · interact_live.py · render_readme.py
 deployments/studio-next.json  address, bytecode SHA-256, every live tx + validator votes
 frontend/                   Vite + React + Tailwind + lucide + viem/genlayer-js "Truth Court" HUD
@@ -35,12 +35,12 @@ frontend/                   Vite + React + Tailwind + lucide + viem/genlayer-js 
 |---|---|
 | Network | GenLayer Studio Next, chain id `61997` (`0xF22D`) |
 | RPC | `https://studio-next.genlayer.com/api` |
-| Contract | [`0xd4D11029d4DA195dCc3342cF4D677c6B1A16E64C`](https://explorer-studio-next.genlayer.com/address/0xd4D11029d4DA195dCc3342cF4D677c6B1A16E64C) |
+| Contract | [`0xE2062d47d7ce0c8311fDC865D5b8a4dD8cBF3Bf5`](https://explorer-studio-next.genlayer.com/address/0xE2062d47d7ce0c8311fDC865D5b8a4dD8cBF3Bf5) |
 | Deployer / governor | `0x27a1Ebe0C137F74D3fbdeF8796B3B5Ad7af45aaa` |
-| Bytecode SHA-256 | `cda324d94496a4f1abf5d2862476e30495db95c34c42b46a0bebef2589febb39` |
+| Bytecode SHA-256 | `a655f4c124f2aba4c5ee3ba6d1808a202de6aef8593ea07609bc70339e5e7700` |
 | Runner | `py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng` |
-| Deployed | 2026-10-02T11:20:00+00:00 |
-| Deploy tx | [`0x81672b1c…aae667`](https://explorer-studio-next.genlayer.com/transactions/0x81672b1ce546a6d99c85e92bbc7daf971bd2c9ce8dfcf9e9f4c461071caae667) |
+| Deployed | 2026-10-02T12:28:03+00:00 (ISO-8601 UTC, deploy.py clock) |
+| Deploy tx | [`0xf456a0de…63ac0c`](https://explorer-studio-next.genlayer.com/transactions/0xf456a0de8cee3e5ada9c725e43f232c963be00d04bd07c27045d7aa5fe63ac0c) |
 <!-- CONTRACT:END -->
 
 ### Court docket on chain
@@ -53,21 +53,23 @@ frontend/                   Vite + React + Tailwind + lucide + viem/genlayer-js 
 | #2B `fed-100bps-sep-2026-primary` | Did the US Federal Reserve cut rates by 100bps in Sep 2026? (primary sources) | TENTATIVE_RESOLVED | NO | 0.05 GEN | 0.03 GEN |
 | #3 `country-x-treaty-y-q3` | Did Country X sign Treaty Y by Q3? | TENTATIVE_RESOLVED | AMBIGUOUS_VOID | 0.05 GEN | 0.03 GEN |
 | #4 `boe-cut-sep-2026` | Did the Bank of England cut Bank Rate at its September 2026 meeting? | OPEN | UNRESOLVED | 0.05 GEN | 0.03 GEN |
-| #5 `starship-flight-8-appeal` | Appeal demo: did Starship Flight 8 take place? (challenge game) | FINALIZED | YES | 0.05 GEN | 0 GEN |
+| #5 `starship-flight-8-appeal` | Appeal demo: did Starship Flight 8 take place? (challenge game) | FINALIZED | YES | 0.05 GEN | 0.03 GEN |
 
-Accounting invariant on chain (`get_accounting`): `pool_held + locked_bonds + credits_total + vault == total_in - total_out` → **True** (pool_held 0.4495, locked_bonds 0.4, credits 0.2005, vault 0.1 GEN).
+Accounting invariant on chain (`get_accounting`): `pool_held + locked_bonds + credits_total + vault == total_in - total_out` → **True** (pool_held 0.4792, locked_bonds 0.4, credits 0.2008, vault 0.1 GEN).
 <!-- CASES:END -->
 
-**This is the hardened v1.1 deployment (audit fixes below) and its docket is empty until seeded** — run
-`python scripts/interact_live.py seed`. The previous v1.0 contract (`0xDe42da18A2b03B877D66Fa46289dDD9B0AC9a0B8`) was seeded with
-the four brief cases plus a challenge/jury demo and remains the live evidence for those flows; its full transaction record is archived in
-[`deployments/studio-next.v1-seeded.json`](deployments/studio-next.v1-seeded.json). Observed v1.0 results: Case #1 → YES, #2B (Fed primary
-sources) → NO, #2A (calendar/index pages) → AMBIGUOUS_VOID, #3 (placeholder treaty) → AMBIGUOUS_VOID, #4 left OPEN, and the appeal demo:
-proposer VOID overturned to YES by a 7–0 jury with the proposer's bond split 0.05 / 0.05 between challenger and vault.
-Seeded markets have a 24 h challenge window, so they settle only after someone calls `finalize_resolution`.
+**Live deployments.** The current contract is **v1.2** (address above), seeded live with **25 on-chain transactions**: the four brief
+cases (#1 Starship, #2A/#2B Fed, #3 placeholder treaty, #4 pending) plus an appeal demo (#5) that was proposed, challenged with a 0.2 GEN bond
+and decided by the 7-juror round. The earlier **v1.1** contract (`0xd4D11029d4DA195dCc3342cF4D677c6B1A16E64C`) is also live and was fully
+seeded the same way with **27 on-chain transactions** (24 returned, 3 did not — see the disclosures below); its record is archived in
+[`deployments/studio-next.v1.1-seeded.json`](deployments/studio-next.v1.1-seeded.json) and v1.0 in
+[`deployments/studio-next.v1-seeded.json`](deployments/studio-next.v1-seeded.json).
 
-The v1.1 changes (`disputed_at`, `void_stale_disputed_market`, source freeze, read quorum) are covered by 313 direct-mode tests; they have **not**
-yet been exercised with live seeded markets.
+**Case #5 on chain (v1.1 and v1.2 behaved identically).** The proposer's `YES` verdict was challenged; the 7-juror round voted `YES` 7–0 and
+therefore **upheld the proposer**, so the *challenger's* 0.2 GEN bond was slashed: 0.1 GEN to the proposer and 0.1 GEN to the protocol safety
+vault (`get_accounting().vault == 0.1 GEN` on both contracts). Outcomes come from live validators and LLMs and are not perfectly repeatable
+between runs; #2A deliberately cites calendar/index pages and fails safe to `AMBIGUOUS_VOID`, while #2B cites the Fed's own statements. Seeded
+markets have a 24 h challenge window, so Cases #1–#3 settle only after `finalize_resolution`.
 
 ### On-chain proofs
 
@@ -78,35 +80,48 @@ is reached, which is normal).
 <!-- PROOFS:START -->
 | # | Action | Market | Consensus | Validators agree | Transaction |
 |---|---|---|---|---|---|
-| 0 | deploy contract | — | — | — | [`0x81672b1c…aae667`](https://explorer-studio-next.genlayer.com/transactions/0x81672b1ce546a6d99c85e92bbc7daf971bd2c9ce8dfcf9e9f4c461071caae667) |
-| 1 | case-1: create market | `starship-flight-8` | MAJORITY_AGREE | 3/5 | [`0x5b7f0404…c12389`](https://explorer-studio-next.genlayer.com/transactions/0x5b7f0404b4e0f2f9903fb86fbf8723f50454691d06010a90a8199b3e39c12389) |
-| 2 | case-2a: create market | `fed-100bps-sep-2026` | MAJORITY_AGREE | 3/5 | [`0xa9e38ad2…fbb32b`](https://explorer-studio-next.genlayer.com/transactions/0xa9e38ad2f8e23ab5177a214a121c9da80219e566c7a03e7a5ec444192afbb32b) |
-| 3 | case-2b: create market | `fed-100bps-sep-2026-primary` | MAJORITY_AGREE | 3/5 | [`0x04d26300…6f15b2`](https://explorer-studio-next.genlayer.com/transactions/0x04d263008647afe4cdfa47b5c38e6247c6e94657056f5e0104248e1c9f6f15b2) |
-| 4 | case-3: create market | `country-x-treaty-y-q3` | MAJORITY_AGREE | 3/5 | [`0x65849211…4c26d0`](https://explorer-studio-next.genlayer.com/transactions/0x65849211f4d03502dd9d70b48c4f1753219f3c52f42a5af767346a5d484c26d0) |
-| 5 | case-4: create market | `boe-cut-sep-2026` | MAJORITY_AGREE | 3/5 | [`0x96dee3d2…827908`](https://explorer-studio-next.genlayer.com/transactions/0x96dee3d2ae4c7c1ec3e9cab268bd8ad71f2823176285863e08b7d34fd2827908) |
-| 6 | case-5: create market | `starship-flight-8-appeal` | MAJORITY_AGREE | 3/5 | [`0x75aeec4f…58e817`](https://explorer-studio-next.genlayer.com/transactions/0x75aeec4ff6e7661ec8ec491ad7c675362cbb1660b4d6c9a6f2becc414c58e817) |
-| 7 | case-1: bet YES | `starship-flight-8` | MAJORITY_AGREE | 3/5 | [`0xa4f45017…c241d8`](https://explorer-studio-next.genlayer.com/transactions/0xa4f45017587ffd27b50885d059ffb58cf857fe340e7a068e4e9cd15271c241d8) |
-| 8 | case-1: bet NO | `starship-flight-8` | MAJORITY_AGREE | 3/5 | [`0xc342f393…89a4f2`](https://explorer-studio-next.genlayer.com/transactions/0xc342f393e978fb3040e6777b3532180f42a259a93395ce53e77333b5a089a4f2) |
-| 9 | case-2a: bet YES | `fed-100bps-sep-2026` | MAJORITY_AGREE | 3/5 | [`0x2adfe487…2f7acc`](https://explorer-studio-next.genlayer.com/transactions/0x2adfe487144bbad990fbffa21d01a9c10f21e81784a564ef4799d3a3a12f7acc) |
-| 10 | case-2a: bet NO | `fed-100bps-sep-2026` | MAJORITY_AGREE | 3/5 | [`0x2bae94f9…7bf52e`](https://explorer-studio-next.genlayer.com/transactions/0x2bae94f90e6098d1d02acf6c428c84e30ecd65ac0a3ce596d9da7813927bf52e) |
-| 11 | case-2b: bet YES | `fed-100bps-sep-2026-primary` | MAJORITY_AGREE | 3/5 | [`0x58d88f36…e343cb`](https://explorer-studio-next.genlayer.com/transactions/0x58d88f36fe79224deb57ddc22c14f18b3cf2fc00333ccdb4ba33443447e343cb) |
-| 12 | case-2b: bet NO | `fed-100bps-sep-2026-primary` | MAJORITY_AGREE | 3/5 | [`0x6d6994a7…0dd5b8`](https://explorer-studio-next.genlayer.com/transactions/0x6d6994a736e06d90ecd35ec90e0c50d3783e3b57e98918c00d175daafb0dd5b8) |
-| 13 | case-3: bet YES | `country-x-treaty-y-q3` | MAJORITY_AGREE | 3/5 | [`0x0c862cbb…6625f3`](https://explorer-studio-next.genlayer.com/transactions/0x0c862cbb96629c4bd5eab48e0ce37a0c370a1ec379ced831deb6c2a5c56625f3) |
-| 14 | case-3: bet NO | `country-x-treaty-y-q3` | MAJORITY_AGREE | 3/5 | [`0xc3b0d214…a5bee6`](https://explorer-studio-next.genlayer.com/transactions/0xc3b0d2148413f90c1fca38f3a75d2b50c13e1bf0ef58fc578b09735715a5bee6) |
-| 15 | case-4: bet YES | `boe-cut-sep-2026` | MAJORITY_AGREE | 3/5 | [`0x8a67c1b1…4c3c60`](https://explorer-studio-next.genlayer.com/transactions/0x8a67c1b1ba05cb922e2d19636ef85c3253794f431d4781aa729919ee294c3c60) |
-| 16 | case-4: bet NO | `boe-cut-sep-2026` | MAJORITY_AGREE | 3/5 | [`0xca588015…7b6f67`](https://explorer-studio-next.genlayer.com/transactions/0xca588015cf6c5587bb7f2f832e1d870d6c2e77c34ac86339fa8b1946057b6f67) |
-| 17 | case-5: bet YES | `starship-flight-8-appeal` | MAJORITY_AGREE | 3/5 | [`0xca1d90e6…074a5b`](https://explorer-studio-next.genlayer.com/transactions/0xca1d90e644e4c60c8c9a462568afc85295263c09c469b23dc29aa968da074a5b) |
-| 18 | case-5: bet NO | `starship-flight-8-appeal` | MAJORITY_AGREE | 3/5 | [`0xd8afe18b…96fe30`](https://explorer-studio-next.genlayer.com/transactions/0xd8afe18b82725d78548830b987db12f1de891941166353c8971ecf78dd96fe30) |
-| 19 | case-1: propose resolution | `starship-flight-8` | MAJORITY_DISAGREE | 0/5 | [`0xfd6c7399…666c30`](https://explorer-studio-next.genlayer.com/transactions/0xfd6c739945658d5f2e22075b82a8e679cbe769ddb61844c92468a38710666c30) |
-| 20 | case-1: propose resolution | `starship-flight-8` | MAJORITY_DISAGREE | 0/5 | [`0x14c4213d…1a92e7`](https://explorer-studio-next.genlayer.com/transactions/0x14c4213d15d6d52982e131377beadcc2c9a30986766f55b578e7f102511a92e7) |
-| 21 | case-1: propose resolution | `starship-flight-8` | MAJORITY_AGREE | 3/5 | [`0x13f606e9…de6c39`](https://explorer-studio-next.genlayer.com/transactions/0x13f606e9bd96bddd90f2f2edaa354355edc50da541b036f3c9d6a0873fde6c39) |
-| 22 | case-2a: propose resolution | `fed-100bps-sep-2026` | MAJORITY_AGREE | 3/5 | [`0x24fba309…ae3a70`](https://explorer-studio-next.genlayer.com/transactions/0x24fba309f016a5af1f98b7901dc8878c29976bc8ca380cdd1e5d93afb2ae3a70) |
-| 23 | case-2b: propose resolution | `fed-100bps-sep-2026-primary` | MAJORITY_AGREE | 3/5 | [`0x55ee6273…f0363a`](https://explorer-studio-next.genlayer.com/transactions/0x55ee6273a44306a8e296206c1e58bc146f90d8bcdba910607d15834b18f0363a) |
-| 24 | case-3: propose resolution | `country-x-treaty-y-q3` | MAJORITY_AGREE | 3/5 | [`0xe41c95d0…5b9eda`](https://explorer-studio-next.genlayer.com/transactions/0xe41c95d067194cf969e7fab1c2df5fa86e43395fc0b287e74581751c335b9eda) |
-| 25 | case-5: propose resolution | `starship-flight-8-appeal` | MAJORITY_AGREE | 3/5 | [`0xc15370f9…d5d4db`](https://explorer-studio-next.genlayer.com/transactions/0xc15370f9b1f8f2bdb3401dfcb736d2f509d83a69f2ad7223410bd72236d5d4db) |
-| 26 | challenge verdict (starship-flight-8-appeal) | `starship-flight-8-appeal` | MAJORITY_AGREE | 3/5 | [`0x76b61bb8…eb51d0`](https://explorer-studio-next.genlayer.com/transactions/0x76b61bb8986aeb195e609c849d0c161a024c27c4450e9d0d731927061feb51d0) |
-| 27 | convene jury (starship-flight-8-appeal) | `starship-flight-8-appeal` | MAJORITY_AGREE | 3/5 | [`0xc0557060…03389d`](https://explorer-studio-next.genlayer.com/transactions/0xc05570609616dda40613cdf21675e2dde0336ea163152094fc4093782303389d) |
+| 0 | deploy contract | — | — | — | [`0xf456a0de…63ac0c`](https://explorer-studio-next.genlayer.com/transactions/0xf456a0de8cee3e5ada9c725e43f232c963be00d04bd07c27045d7aa5fe63ac0c) |
+| 1 | case-1: create market | `starship-flight-8` | MAJORITY_AGREE | 3/5 | [`0x7bf27908…91f020`](https://explorer-studio-next.genlayer.com/transactions/0x7bf279089965419b223fba3db7d9634c8011204256d51b65b36b8de9ac91f020) |
+| 2 | case-2a: create market | `fed-100bps-sep-2026` | MAJORITY_AGREE | 3/5 | [`0x9b4bb756…94b2ac`](https://explorer-studio-next.genlayer.com/transactions/0x9b4bb756956025540c5f8af35b53b71ae983eef386276589d7afeaa62194b2ac) |
+| 3 | case-2b: create market | `fed-100bps-sep-2026-primary` | MAJORITY_AGREE | 4/5 | [`0xd7f60fa8…0dcdd0`](https://explorer-studio-next.genlayer.com/transactions/0xd7f60fa84c6148fcf9aa6c7cef7ee1a836d2c433e3bfa881c8a911bf650dcdd0) |
+| 4 | case-3: create market | `country-x-treaty-y-q3` | MAJORITY_AGREE | 3/5 | [`0xd07a7129…133c11`](https://explorer-studio-next.genlayer.com/transactions/0xd07a71292b879cd62ec9390398ab845e11489c49e7924d6c3c0fe1778b133c11) |
+| 5 | case-4: create market | `boe-cut-sep-2026` | MAJORITY_AGREE | 3/5 | [`0x1726215e…ef0b0a`](https://explorer-studio-next.genlayer.com/transactions/0x1726215e9f57b1a9cfaa70edb8027f787d88169f00300fdd983d92aeb0ef0b0a) |
+| 6 | case-5: create market | `starship-flight-8-appeal` | MAJORITY_AGREE | 3/5 | [`0x617f92b5…6b58d0`](https://explorer-studio-next.genlayer.com/transactions/0x617f92b516b1b3e890b65204381d2e68248419f34dce07854269663ce76b58d0) |
+| 7 | case-1: bet YES | `starship-flight-8` | MAJORITY_AGREE | 3/5 | [`0x0e15e1ca…ae9bbc`](https://explorer-studio-next.genlayer.com/transactions/0x0e15e1cabf95d719d01922c881dc482cbbc4f8d8f5ad020b861c747849ae9bbc) |
+| 8 | case-1: bet NO | `starship-flight-8` | MAJORITY_AGREE | 4/5 | [`0x5b0a7357…5f4960`](https://explorer-studio-next.genlayer.com/transactions/0x5b0a735724f73259c2672e8d45453431da1512451c2aabf3030c1528125f4960) |
+| 9 | case-2a: bet YES | `fed-100bps-sep-2026` | MAJORITY_AGREE | 3/5 | [`0x3f234f16…21d322`](https://explorer-studio-next.genlayer.com/transactions/0x3f234f16ae40f54740f1cce6d4419f16c3b8b33efcd8d6a2992cda346621d322) |
+| 10 | case-2a: bet NO | `fed-100bps-sep-2026` | MAJORITY_AGREE | 3/5 | [`0x9ecb35cf…f5d09d`](https://explorer-studio-next.genlayer.com/transactions/0x9ecb35cf196acaf7dc5d041fefad80c2d64fe1cc5e4334844119936e10f5d09d) |
+| 11 | case-2b: bet YES | `fed-100bps-sep-2026-primary` | MAJORITY_AGREE | 3/5 | [`0x97f57487…47f6a2`](https://explorer-studio-next.genlayer.com/transactions/0x97f574879be1fd5520a2476220fd8fe5db22bf34b07f463252b971297647f6a2) |
+| 12 | case-2b: bet NO | `fed-100bps-sep-2026-primary` | MAJORITY_AGREE | 3/5 | [`0xf8960233…54b15d`](https://explorer-studio-next.genlayer.com/transactions/0xf8960233d4279316881ed163c48abcc9ed4030da1f6cb3ad87f8cf636154b15d) |
+| 13 | case-3: bet YES | `country-x-treaty-y-q3` | MAJORITY_AGREE | 3/5 | [`0xc431135b…326ade`](https://explorer-studio-next.genlayer.com/transactions/0xc431135b32836131362271d0357112e3d8c44f9288b9491b3d802d6a7a326ade) |
+| 14 | case-3: bet NO | `country-x-treaty-y-q3` | MAJORITY_AGREE | 3/5 | [`0x61508119…25ab7b`](https://explorer-studio-next.genlayer.com/transactions/0x61508119aff4fe40cb632c20884e8d25b4f89b89a5ddfbc549ad64068025ab7b) |
+| 15 | case-4: bet YES | `boe-cut-sep-2026` | MAJORITY_AGREE | 3/5 | [`0xbaa22b85…9b0581`](https://explorer-studio-next.genlayer.com/transactions/0xbaa22b85ba37556d2f118bcef331f403c9ee06c558e2f256fa866bffc99b0581) |
+| 16 | case-4: bet NO | `boe-cut-sep-2026` | MAJORITY_AGREE | 3/5 | [`0xa84fda2b…c46194`](https://explorer-studio-next.genlayer.com/transactions/0xa84fda2b84a1dd5f10a0a265537af9d227c29ed9cbee1a0d8edf328ea4c46194) |
+| 17 | case-5: bet YES | `starship-flight-8-appeal` | MAJORITY_AGREE | 3/5 | [`0x01ae68ae…1bccca`](https://explorer-studio-next.genlayer.com/transactions/0x01ae68aeaca1aa79943b0e867d921c185fd974e54e1e161c1ac4a19cfb1bccca) |
+| 18 | case-5: bet NO | `starship-flight-8-appeal` | MAJORITY_AGREE | 3/5 | [`0x9396356c…cb62fd`](https://explorer-studio-next.genlayer.com/transactions/0x9396356cccd07987c03dc5f66619d8460c9fdccc54681a8c8474b0539ccb62fd) |
+| 19 | case-1: propose resolution | `starship-flight-8` | MAJORITY_AGREE | 3/5 | [`0xe2a2d4a4…6c416f`](https://explorer-studio-next.genlayer.com/transactions/0xe2a2d4a40e73f41c55936511be6b884259342dd34547eca4c6fd2c18b16c416f) |
+| 20 | case-2a: propose resolution | `fed-100bps-sep-2026` | MAJORITY_AGREE | 3/5 | [`0x06a1c880…f3cd07`](https://explorer-studio-next.genlayer.com/transactions/0x06a1c880ed405356ed0fbf3774c9a21951bd8a55ab99e92f1cc3be9b58f3cd07) |
+| 21 | case-2b: propose resolution | `fed-100bps-sep-2026-primary` | MAJORITY_AGREE | 3/5 | [`0xbdbc0ef9…bf350e`](https://explorer-studio-next.genlayer.com/transactions/0xbdbc0ef9a03c4cc173d7465e8d0a88849f03b9c56180c6114e2119be45bf350e) |
+| 22 | case-3: propose resolution | `country-x-treaty-y-q3` | MAJORITY_AGREE | 3/5 | [`0xde1ef42a…a0c9ce`](https://explorer-studio-next.genlayer.com/transactions/0xde1ef42ae9d96dcf371f0df5ce006cc87107cbb62c7e037cc1f237059ba0c9ce) |
+| 23 | case-5: propose resolution | `starship-flight-8-appeal` | MAJORITY_AGREE | 3/5 | [`0x9f955df7…35720b`](https://explorer-studio-next.genlayer.com/transactions/0x9f955df7986d1895aa613192b995ecfe78592f4f0db15f7377a1c576ca35720b) |
+| 24 | challenge verdict (starship-flight-8-appeal) | `starship-flight-8-appeal` | MAJORITY_AGREE | 3/5 | [`0x0f57a675…db7d95`](https://explorer-studio-next.genlayer.com/transactions/0x0f57a675de0a79e069421d4a14aa1613c6affb4569f53fbb14ff00cb86db7d95) |
+| 25 | convene jury (starship-flight-8-appeal) | `starship-flight-8-appeal` | MAJORITY_AGREE | 3/5 | [`0x3674a36f…09a490`](https://explorer-studio-next.genlayer.com/transactions/0x3674a36f87026c2becbb59b0388aba7fa5582940c40c532f4fa33af19009a490) |
 <!-- PROOFS:END -->
+
+### Live Consensus & Execution Disclosures
+
+Taken from the archived deployment records; nothing here is edited out of the proofs.
+
+* **v1.2 (current):** all 25 transactions finished with a return and `MAJORITY_AGREE`; no retries and no reverts.
+* **v1.1, Market #1 consensus retries.** Proposing the resolution of `starship-flight-8` took **three** attempts (tx #19, #20, #21). The first
+  two ended `MAJORITY_DISAGREE` / `FINISHED_WITH_ERROR` (0 of 5 validators agreed) and the third reached `MAJORITY_AGREE`. For the first attempt the
+  leader's result was `[TRANSIENT] sources temporarily unavailable`, i.e. the live web read failed; the contract is designed to revert on that
+  rather than guess. I did not individually inspect the second attempt's receipt, so its cause is presumed to be the same live-web variance.
+* **v1.1, Market #5 NO bet.** The `NO` stake on `starship-flight-8-appeal` (tx #18) finished `FINISHED_WITH_ERROR`; the pool is therefore
+  one-sided (0.05 GEN YES, 0 NO). It was submitted after the market's betting window had elapsed (the seed run had been slowed by RPC rate
+  limiting; the follow-up run logged "betting window closed"). The exact revert text was not captured. In v1.2 both stakes landed (0.05 / 0.03).
+* **Timestamps.** `deployed_at` in the deployment table is **ISO-8601 in UTC** (offset `+00:00`), taken from the deploying machine's clock when
+  `scripts/deploy.py` recorded the contract; it is not a block timestamp.
 
 ---
 
@@ -220,7 +235,7 @@ Enums: outcome `UNRESOLVED=0 YES=1 NO=2 AMBIGUOUS_VOID=3`; status `OPEN=0 RESOLV
 ## 6. Running it
 
 ```bash
-# tests — 313 tests, in-memory GenVM, parallel
+# tests — 320 tests, in-memory GenVM, parallel
 uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python genlayer-test==0.30.0rc2 genlayer-py==0.19.0rc2 python-dotenv requests pytest pytest-xdist
 .venv/bin/python -m pytest                 # add -n0 to run serially
 genvm-lint check contracts/poly_verdict.py
@@ -246,7 +261,7 @@ fee manager, so scripts read the live fee policy and pass an explicit fee distri
 <!-- VERIFY:START -->
 | Check | Result |
 |---|---|
-| `pytest` (direct mode) | **313 passed** |
+| `pytest` (direct mode) | **320 passed** |
 | `genvm-lint check contracts/poly_verdict.py` | **Lint passed, validation passed** (24 methods: 13 view, 11 write) |
 | `npm run build` (`tsc -b && vite build`) | **0 TypeScript / bundle errors** |
 | `node frontend/scripts/console-check.mjs` | **PASS — zero console errors** loading the live contract (navbar 64 px, Protocol drawer opened; Evidence Room verified on the seeded v1.0 docket) |
@@ -286,7 +301,7 @@ PolyVerdict reduces — it does not remove — trust. Read these before putting 
 * **Transfers settle asynchronously.** `emit_transfer(on="finalized")` can fail *after* the enqueue succeeded; the rollback guard only
   covers enqueue-time failures.
 * **Dust and fees.** Division dust (< 1 wei per winner) is never swept; the 1 % fee is not configurable.
-* **Tests run against mocks.** The 313 direct-mode tests exercise leader logic and validator comparison with mocked web/LLM replies.
+* **Tests run against mocks.** The 320 direct-mode tests exercise leader logic and validator comparison with mocked web/LLM replies.
   Real-network behaviour is evidenced only by the live transactions above (which are few and Studio Next is a resettable testnet).
 * **Frontend writes are unverified end-to-end.** Reads were verified against the live contract (zero console errors); the wallet
   paths (`place_prediction`, `challenge_verdict`, …) are implemented against `genlayer-js 2.0.0-rc.1` but were **not** exercised with a real
@@ -297,10 +312,12 @@ PolyVerdict reduces — it does not remove — trust. Read these before putting 
   differently.
 
 
-## 9. Audit hardening (v1.1)
+## 9. Audit hardening (v1.1 / v1.2)
 
 | Finding | Fix |
 |---|---|
 | Disputed market could lock up forever if nobody convened the jury | `challenge_verdict` stores `disputed_at`; after `DISPUTE_STALE_WINDOW = 7 days` anyone may call `void_stale_disputed_market`: both bonds return to their owners' credits, the market voids and all bettors can claim 100 % principal. Counters (`locked_bonds`, `credits_total`, `pool_held`) stay balanced. |
 | Creator could swap sources after bets were placed | `add_source` reverts with `ERR_MARKET_ALREADY_ACTIVE` once any stake exists or `end_timestamp` has passed. |
 | Single readable source decided multi-source markets | `_derive_outcome`: a market with ≥ 2 sources where fewer than 2 returned HTTP 2xx fails safe to `AMBIGUOUS_VOID`. |
+| Single-domain quorum bypass (two paths on one site counted as two sources) | Quorum counts **distinct domains** (`_domain_of`: lower-cased host, leading `www.` removed). A market spanning ≥ 2 domains needs ≥ 2 distinct domains read *and* ≥ 2 distinct domains with a definitive stance; otherwise `AMBIGUOUS_VOID`. Single-domain markets (e.g. Fed primary documents) can resolve on that one domain. |
+| Jury could decide YES/NO on one readable domain | `_convene_jury` applies the same read quorum: ≥ 2 configured domains but < 2 readable → unanimous `VOID` ballot without consulting the LLM. |
