@@ -43,6 +43,8 @@ async function ensureChain(p: Eip1193): Promise<void> {
   }
 }
 
+const TX_FEE_VALUE = 100000000000000000n; // 0.1 GEN, must be > 0
+
 export function useWallet(): Wallet {
   const [address, setAddress] = useState<`0x${string}` | null>(null);
   const [busy, setBusy] = useState(false);
@@ -89,6 +91,8 @@ export function useWallet(): Wallet {
         functionName: fn,
         args: args as never,
         value,
+        // Studio Next consensus rejects fee-aware txs with FeeValueMustBeNonZero when this is 0.
+        fees: { feeValue: TX_FEE_VALUE },
       } as never);
       return String(hash);
     },
