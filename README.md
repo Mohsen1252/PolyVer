@@ -18,12 +18,103 @@ oracle with a court that lives on [GenLayer](https://genlayer.com):
 - RPC: `https://studio-next.genlayer.com/api` · Explorer: <https://explorer-studio-next.genlayer.com>
 - Author: SOBEK96 <btcehsan@yahoo.com>
 
+## Frontend Trial-Creation Verification & Live Proof
+
+The Create Prediction Trial flow is covered twice: an offline test suite that drives the exact frontend modules, and a live run on
+Studio Next that clicks through the production build in a headless browser with an injected EIP-1193 wallet.
+
+**What the frontend does** (`frontend/src/createTrial.ts`, `frontend/src/txPath.ts`; the modal and wallet call these, nothing is duplicated):
+form validation → fee configuration derived from the live fee policy (`estimateTransactionFees`) → `genlayer-js` `writeContract` over the
+wallet's `eth_sendTransaction` → receipt polling until `ACCEPTED`/`FINALIZED` **and** `FINISHED_WITH_RETURN` → `get_market` readback →
+docket refresh.
+
+### 1. Path test suite (`npm test`)
+
+```
+$ cd frontend && npm test        # vitest run — src/__tests__/create_trial_path.test.ts
+
+ ✓ 1. form validation (13)        accepts a complete form · rejects empty title / clause / no sources / 7 sources / http / garbage URL /
+                                  no deadline / deadline < 60 s / past deadline · de-duplicated domain roots · exact create_market args · slug bounds
+ ✓ 2. fee derivation and transaction construction (6)
+                                  non-zero feeValue (100000000000010352 wei) + real distribution from the fee policy · zero feeValue refused
+                                  (FeeValueMustBeNonZero regression) · chain switch / add (4902) · ONE eth_sendTransaction to the consensus
+                                  contract with create_market calldata and the derived fee · bond on top of fee · wallet rejection (4001) surfaced
+ ✓ 3. receipt polling and finality (8)
+                                  ACCEPTED / FINALIZED + FINISHED_WITH_RETURN accepted · undecided and FINISHED_WITH_ERROR rejected ·
+                                  429 / timeout while polling is retried · real execution failure is not retried
+ ✓ 4. full creation flow (4)      validate → wallet tx → finality → readback → docket refresh shows the new trial · invalid form never
+                                  reaches the wallet · execution revert fails loudly · unreadable trial after "success" fails
+
+ Test Files  1 passed (1)
+      Tests  31 passed (31)
+```
+
+The suite runs the real `genlayer-js` client against a stubbed Studio JSON-RPC (fee config and receipt recorded from the live node, see
+`frontend/src/__tests__/fixtures/`), so the transaction handed to the wallet is the one a user would be asked to sign. It passes under
+`TZ=UTC`, `America/Los_Angeles`, `Asia/Tehran` and `Pacific/Kiritimati`.
+
+### 2. Live trial created through the frontend path on Studio Next (chain 61997)
+
+```
+$ cd frontend && npm run build && npm run e2e:create-trial      # scripts/e2e-create-trial.mjs
+```
+
+The script funds a fresh throw-away wallet with `sim_fundAccount`, serves the production build, and drives it with headless Chrome. `window.ethereum`
+is an injected EIP-1193 provider whose keys live in Node; it signs the `eth_sendTransaction` the page requests and broadcasts it. The UI is clicked
+through: **Connect Wallet → Create Prediction Trial → fill form → Create trial**. Machine-readable record: [`deployments/verification.json`](deployments/verification.json).
+
+| Field | Value |
+|---|---|
+| Wallet | `0xE8871c3a6feEFF8f87779e9d71C3e31626C6C7b1` (funded via `sim_fundAccount`) |
+| Contract | `0xE2062d47d7ce0c8311fDC865D5b8a4dD8cBF3Bf5` |
+| Call | `create_market` (the "Create Prediction Trial" button) |
+| **Tx hash** | [`0x7273a846db8023f62cc309e892d8c3b5fd2c4a30674c19937fa7bc3f9b1c94d0`](https://explorer-studio-next.genlayer.com/transactions/0x7273a846db8023f62cc309e892d8c3b5fd2c4a30674c19937fa7bc3f9b1c94d0) |
+| **Trial ID** | `polyverdict-frontend-e2e-trial-2026-10-1-mvap8fum` |
+| Derived `feeValue` | `100000000000010352` wei (signed tx value; `create_market` carries no stake) |
+| Wallet RPC methods used by the page | `eth_requestAccounts`, `wallet_switchEthereumChain`, `eth_sendTransaction` |
+| Consensus | `ACCEPTED` · `FINISHED_WITH_RETURN` |
+| UI confirmation | "Trial created and read back on-chain: polyverdict-frontend-e2e-trial-2026-10-1-mvap8fum (ACCEPTED · FINISHED_WITH_RETURN)" |
+
+On-chain readback (independent `get_market` read after the run, not through the UI):
+
+```json
+{
+  "market_id": "polyverdict-frontend-e2e-trial-2026-10-1-mvap8fum",
+  "title": "PolyVerdict frontend e2e trial 2026-10-16T08:21Z",
+  "creator": "0xe8871c3a6feeff8f87779e9d71c3e31626c6c7b1",
+  "status_name": "OPEN",
+  "source_whitelist": ["apnews.com", "federalreserve.gov"],
+  "source_urls": ["https://apnews.com/hub/federal-reserve", "https://www.federalreserve.gov/newsevents/pressreleases.htm"],
+  "end_timestamp": 1792311660,
+  "yes_pool": 0, "no_pool": 0,
+  "get_market_count": 11
+}
+```
+
+`creator` equals the wallet that signed, and the readback fields match what the form submitted.
+
+**What the live run found.** Before this test, the wallet path sent a hard-coded `feeValue` of 0.1 GEN with an empty fee distribution. Run against
+Studio Next, that transaction **reverted with `FeeValueMustBeNonZero(1)`**, so the earlier fee "fix" did not work end to end. The deposit has to match a
+fee distribution, so the frontend now derives both from the live policy. A second bug the same run exposed: the receipt carries `status_name`, not
+`statusName`, so a naive finality check could not recognise a decided transaction. Both are fixed and covered by the suite above.
+
+**Scope and honesty notes.**
+* The wallet is an injected EIP-1193 provider signing with a real key in headless Chrome. It is not the MetaMask extension UI. Only `create_market`
+  was exercised live through the browser; the other writes (`place_prediction`, `propose_resolution`, `challenge_verdict`, …) share the same
+  `sendWrite` path but have not been clicked through live.
+* Development runs of this test (and one fee probe) each created a throw-away trial on the shared contract, so `get_market_count` is higher than
+  in the seeded dossier. The trial recorded above is the one from the final run.
+* The public RPC allows 30 requests/min; background docket reads occasionally got HTTP 429 / "busy" during the browser run
+  (`rpc_rate_limit_console_noise_count` in the record). The app retries these; they are recorded, not hidden. `unexpected_console_errors` is empty.
+
 ```
 contracts/poly_verdict.py   GenVM contract (≈1000 lines)
 tests/                      320 direct-mode pytest tests (in-memory GenVM, no network)
 scripts/                    deploy.py · interact_live.py · render_readme.py
 deployments/studio-next.json  address, bytecode SHA-256, every live tx + validator votes
 frontend/                   Vite + React + Tailwind + lucide + viem/genlayer-js "Truth Court" HUD
+frontend/src/__tests__/     vitest: trial-creation transaction path (31 tests)
+deployments/verification.json  live frontend trial-creation proof (tx hash, trial id, readback)
 ```
 
 ---
@@ -54,6 +145,11 @@ frontend/                   Vite + React + Tailwind + lucide + viem/genlayer-js 
 | #3 `country-x-treaty-y-q3` | Did Country X sign Treaty Y by Q3? | TENTATIVE_RESOLVED | AMBIGUOUS_VOID | 0.05 GEN | 0.03 GEN |
 | #4 `boe-cut-sep-2026` | Did the Bank of England cut Bank Rate at its September 2026 meeting? | OPEN | UNRESOLVED | 0.05 GEN | 0.03 GEN |
 | #5 `starship-flight-8-appeal` | Appeal demo: did Starship Flight 8 take place? (challenge game) | FINALIZED | YES | 0.05 GEN | 0.03 GEN |
+| #? `polyverdict-frontend-e2e-trial-2026-10-1-mvap10it` | PolyVerdict frontend e2e trial 2026-10-16T08:15Z | OPEN | UNRESOLVED | 0 GEN | 0 GEN |
+| #? `polyverdict-frontend-e2e-trial-2026-10-1-mvap243o` | PolyVerdict frontend e2e trial 2026-10-16T08:16Z | OPEN | UNRESOLVED | 0 GEN | 0 GEN |
+| #? `polyverdict-frontend-e2e-trial-2026-10-1-mvap2tia` | PolyVerdict frontend e2e trial 2026-10-16T08:17Z | OPEN | UNRESOLVED | 0 GEN | 0 GEN |
+| #? `rec-mvap4grt` | t | OPEN | UNRESOLVED | 0 GEN | 0 GEN |
+| #? `polyverdict-frontend-e2e-trial-2026-10-1-mvap8fum` | PolyVerdict frontend e2e trial 2026-10-16T08:21Z | OPEN | UNRESOLVED | 0 GEN | 0 GEN |
 
 Accounting invariant on chain (`get_accounting`): `pool_held + locked_bonds + credits_total + vault == total_in - total_out` → **True** (pool_held 0.4792, locked_bonds 0.4, credits 0.2008, vault 0.1 GEN).
 <!-- CASES:END -->
@@ -249,22 +345,28 @@ genvm-lint check contracts/poly_verdict.py
 .venv/bin/python scripts/render_readme.py             # refresh the generated README tables
 
 # frontend
-cd frontend && npm install && npm run build && npm run console-check
+cd frontend && npm install && npm test && npm run build
+npm run e2e:create-trial   # live: browser + injected wallet creates a trial on Studio Next
+npm run console-check      # live reads; sensitive to the public RPC's 30 req/min limit
 npm run dev
 ```
 
 `.env` holds a throw-away **testnet** key (git-ignored, `chmod 600`); testnet GEN has no value. Studio Next has no on-chain
-fee manager, so scripts read the live fee policy and pass an explicit fee distribution with every transaction (~0.1 GEN deposit).
+fee manager, so scripts and the frontend read the live fee policy (`sim_getFeeConfig`) and pass a matching fee distribution + deposit with every
+transaction (~0.1 GEN). A bare constant `feeValue` with an empty distribution reverts with `FeeValueMustBeNonZero`.
 
 ## 7. Verification status
 
 <!-- VERIFY:START -->
 | Check | Result |
 |---|---|
-| `pytest` (direct mode) | **320 passed** |
+| `pytest` (direct mode) | **320 passed** (pinned `GENVM_VERSION=v0.6.0-rc8`; the locally cached rc9 bundle was incomplete) |
 | `genvm-lint check contracts/poly_verdict.py` | **Lint passed, validation passed** (24 methods: 13 view, 11 write) |
 | `npm run build` (`tsc -b && vite build`) | **0 TypeScript / bundle errors** |
-| `node frontend/scripts/console-check.mjs` | **PASS — zero console errors** loading the live contract (navbar 64 px, Protocol drawer opened; Evidence Room verified on the seeded v1.0 docket) |
+| `npm test` (vitest, frontend trial-creation path) | **31 passed** |
+| `npx tsc --noEmit` | **0 errors** |
+| `npm run e2e:create-trial` (live, headless Chrome + injected wallet) | **PASS** — trial created and read back on Studio Next, see the top section |
+| `node frontend/scripts/console-check.mjs` | Passed earlier on the 8-trial docket (zero console errors). Re-run on 2026-10-16 with 11 trials it failed on the public RPC's HTTP 429 / "Server busy" (30 req/min limit; one docket load now needs ~30 reads), not on an application error. Not re-passed since. |
 
 ![docket](docs/docket.png)
 ![evidence room](docs/evidence-room.png)
@@ -303,9 +405,9 @@ PolyVerdict reduces — it does not remove — trust. Read these before putting 
 * **Dust and fees.** Division dust (< 1 wei per winner) is never swept; the 1 % fee is not configurable.
 * **Tests run against mocks.** The 320 direct-mode tests exercise leader logic and validator comparison with mocked web/LLM replies.
   Real-network behaviour is evidenced only by the live transactions above (which are few and Studio Next is a resettable testnet).
-* **Frontend writes are unverified end-to-end.** Reads were verified against the live contract (zero console errors); the wallet
-  paths (`place_prediction`, `challenge_verdict`, …) are implemented against `genlayer-js 2.0.0-rc.1` but were **not** exercised with a real
-  browser wallet. The 1.1.8 release of `genlayer-js` is incompatible with Studio Next (`malformed_entry`), hence the rc pin.
+* **Frontend write coverage is narrow.** `create_market` is verified live through the production build with an injected EIP-1193 wallet (see
+  the verification section at the top). The other wallet writes share the same transaction module but were not each exercised live, and the
+  MetaMask extension UI itself was not driven. The 1.1.8 release of `genlayer-js` is incompatible with Studio Next (`malformed_entry`), hence the rc pin.
 * **Cosmetic extraction limits.** Page text comes from regex tag-stripping, not a DOM parser; boilerplate-heavy pages spend part of the
   3,500-char per-source budget on navigation, and the contract cannot render JavaScript-only pages.
 * **Real-world cases depend on what pages said when scraped** and on the clause wording; a clause worded differently can resolve

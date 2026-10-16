@@ -16,7 +16,7 @@ async function read<T>(functionName: string, args: (string | number | bigint)[] 
       return out as T;
     } catch (e) {
       const msg = String((e as Error)?.message ?? e).toLowerCase();
-      if (attempt >= 5 || !(msg.includes("rate limit") || msg.includes("busy") || msg.includes("too many"))) throw e;
+      if (attempt >= 5 || !(msg.includes("rate limit") || msg.includes("busy") || msg.includes("too many") || msg.includes("failed to fetch"))) throw e;
       await sleep(8000 + attempt * 4000);
     }
   }

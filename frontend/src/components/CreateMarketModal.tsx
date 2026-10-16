@@ -1,16 +1,13 @@
 import { useEffect, useState } from "react";
 import { Loader2, Plus, X } from "lucide-react";
-import { CHAIN_ID } from "../chain";
+import { CHAIN_ID, CONTRACT_ADDRESS } from "../chain";
+import { createTrial, parseSources, validateTrialForm, type CreateTrialResult, type Phase } from "../createTrial";
+import { receiptStatus } from "../txPath";
 import type { Wallet } from "../wallet";
 import { ActionStatus } from "./ActionPanel";
 
 const inputCls =
   "w-full rounded-md border border-slate-700 bg-[#08090d] px-3 py-2 text-sm text-slate-100 outline-none placeholder:text-slate-600 focus:border-verdict";
-
-function slug(title: string): string {
-  const base = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
-  return `${base || "market"}-${Date.now().toString(36)}`.slice(0, 64);
-}
 
 export function CreateMarketModal({ wallet, onClose, onDone }: { wallet: Wallet; onClose: () => void; onDone: () => void }) {
   const [title, setTitle] = useState("");
@@ -20,6 +17,8 @@ export function CreateMarketModal({ wallet, onClose, onDone }: { wallet: Wallet;
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [hash, setHash] = useState<string | null>(null);
+  const [phase, setPhase] = useState<Phase | null>(null);
+  const [result, setResult] = useState<CreateTrialResult | null>(null);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -27,30 +26,28 @@ export function CreateMarketModal({ wallet, onClose, onDone }: { wallet: Wallet;
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const urls = urlsText.split(/[\s,]+/).filter(Boolean);
-  const hosts = [...new Set(urls.map((u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return ""; } }))];
-  const endTs = deadline ? Math.floor(new Date(deadline).getTime() / 1000) : 0;
-
-  function validate(): string | null {
-    if (!title.trim()) return "Enter the market question.";
-    if (!spec.trim()) return "Enter a strict resolution clause.";
-    if (urls.length === 0 || urls.length > 6) return "Provide 1–6 source URLs.";
-    if (urls.some((u) => !u.startsWith("https://")) || hosts.includes("")) return "Every source must be a valid https:// URL.";
-    if (hosts.length > 6) return "At most 6 distinct domains.";
-    if (!endTs || endTs <= Math.floor(Date.now() / 1000) + 60) return "Pick a resolution deadline in the future.";
-    return null;
-  }
+  const { hosts } = parseSources(urlsText);
+  const form = { title, spec, urlsText, deadline };
 
   async function submit() {
     setErr(null);
-    const v = validate();
+    setResult(null);
+    const v = validateTrialForm(form);
     if (v) return setErr(v);
     if (!wallet.address) return setErr(`Connect MetaMask on Studio Next (chain ${CHAIN_ID}) first.`);
     try {
       setBusy(true);
-      const h = await wallet.send("create_market", [slug(title), title.trim(), spec.trim(), hosts, urls, endTs]);
-      setHash(h);
-      setTimeout(onDone, 5000);
+      const r = await createTrial({
+        form,
+        send: wallet.send,
+        contract: CONTRACT_ADDRESS,
+        onPhase: (p, h) => {
+          setPhase(p);
+          if (h) setHash(h);
+        },
+      });
+      setResult(r);
+      setTimeout(onDone, 1500);
     } catch (e) {
       setErr((e as Error).message?.split("\n")[0] ?? String(e));
     } finally {
@@ -108,6 +105,14 @@ export function CreateMarketModal({ wallet, onClose, onDone }: { wallet: Wallet;
           <p className="ticker mt-2 text-[11px] text-slate-500">Wallet not connected — connect MetaMask on Studio Next (chain {CHAIN_ID}) to submit.</p>
         )}
         {err && <p className="mt-3 text-sm text-rose-300">{err}</p>}
+        {busy && phase === "confirming" && (
+          <p className="ticker mt-2 text-[11px] text-slate-400">Waiting for validator consensus (ACCEPTED/FINALIZED)…</p>
+        )}
+        {result && (
+          <p className="ticker mt-2 break-all text-xs text-emerald-300">
+            Trial created and read back on-chain: {result.marketId} ({receiptStatus(result.receipt)} · {result.receipt.txExecutionResultName})
+          </p>
+        )}
         <ActionStatus run={{ busy, hash, err: null, go: async () => {} }} />
       </div>
     </div>

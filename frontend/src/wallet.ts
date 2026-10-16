@@ -1,12 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { createClient } from "genlayer-js";
-import { CHAIN_ID_HEX, CONTRACT_ADDRESS, EXPLORER_URL, RPC_URL, chain } from "./chain";
-
-type Eip1193 = {
-  request: (a: { method: string; params?: unknown[] }) => Promise<unknown>;
-  on?: (ev: string, cb: (...a: unknown[]) => void) => void;
-  removeListener?: (ev: string, cb: (...a: unknown[]) => void) => void;
-};
+import { ensureChain, sendWrite, type Eip1193 } from "./txPath";
 
 const eth = (): Eip1193 | undefined => (window as unknown as { ethereum?: Eip1193 }).ethereum;
 
@@ -19,31 +12,6 @@ export type Wallet = {
   disconnect: () => void;
   send: (fn: string, args: unknown[], value?: bigint) => Promise<string>;
 };
-
-async function ensureChain(p: Eip1193): Promise<void> {
-  try {
-    await p.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN_ID_HEX }] });
-  } catch (e) {
-    if ((e as { code?: number }).code === 4902 || /Unrecognized chain/i.test(String(e))) {
-      await p.request({
-        method: "wallet_addEthereumChain",
-        params: [
-          {
-            chainId: CHAIN_ID_HEX,
-            chainName: "GenLayer Studio Next",
-            nativeCurrency: { name: "GEN Token", symbol: "GEN", decimals: 18 },
-            rpcUrls: [RPC_URL],
-            blockExplorerUrls: [EXPLORER_URL],
-          },
-        ],
-      });
-    } else {
-      throw e;
-    }
-  }
-}
-
-const TX_FEE_VALUE = 100000000000000000n; // 0.1 GEN, must be > 0
 
 export function useWallet(): Wallet {
   const [address, setAddress] = useState<`0x${string}` | null>(null);
@@ -84,17 +52,7 @@ export function useWallet(): Wallet {
     async (fn: string, args: unknown[], value = 0n) => {
       const p = eth();
       if (!p || !address) throw new Error("Connect a wallet first");
-      await ensureChain(p);
-      const client = createClient({ chain, endpoint: RPC_URL, account: address, provider: p as never });
-      const hash = await client.writeContract({
-        address: CONTRACT_ADDRESS,
-        functionName: fn,
-        args: args as never,
-        value,
-        // Studio Next consensus rejects fee-aware txs with FeeValueMustBeNonZero when this is 0.
-        fees: { feeValue: TX_FEE_VALUE },
-      } as never);
-      return String(hash);
+      return sendWrite(p, address, fn, args, value);
     },
     [address],
   );

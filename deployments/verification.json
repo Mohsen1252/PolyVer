@@ -1,0 +1,51 @@
+{
+  "verified_at": "2026-10-16T08:22:06.752Z",
+  "verified": true,
+  "method": "Production build served by vite preview, driven by headless Chrome; window.ethereum is an injected EIP-1193 provider that signs eth_sendTransaction with a local wallet key. UI flow: Connect Wallet -> Create Prediction Trial -> Create trial.",
+  "network": "studio-next",
+  "chain_id": 61997,
+  "contract_address": "0xE2062d47d7ce0c8311fDC865D5b8a4dD8cBF3Bf5",
+  "wallet_address": "0xE8871c3a6feEFF8f87779e9d71C3e31626C6C7b1",
+  "wallet_funding": "sim_fundAccount (Studio Next faucet RPC) to a freshly generated throwaway key",
+  "provider_methods_called": [
+    "eth_requestAccounts",
+    "wallet_switchEthereumChain",
+    "eth_sendTransaction"
+  ],
+  "create_trial": {
+    "fn": "create_market",
+    "trial_id": "polyverdict-frontend-e2e-trial-2026-10-1-mvap8fum",
+    "tx_hash": "0x7273a846db8023f62cc309e892d8c3b5fd2c4a30674c19937fa7bc3f9b1c94d0",
+    "tx_url": "https://explorer-studio-next.genlayer.com/transactions/0x7273a846db8023f62cc309e892d8c3b5fd2c4a30674c19937fa7bc3f9b1c94d0",
+    "fee_value_wei": "100000000000010352",
+    "signed_tx_gas": "1000000",
+    "status_name": "ACCEPTED",
+    "tx_execution_result_name": "FINISHED_WITH_RETURN",
+    "result_name": null
+  },
+  "ui_result_text": [
+    "Trial created and read back on-chain: polyverdict-frontend-e2e-trial-2026-10-1-mvap8fum (ACCEPTED · FINISHED_WITH_RETURN)",
+    "Submitted: 0x7273a846db8023f6…"
+  ],
+  "readback": {
+    "market_count": 11,
+    "market_id": "polyverdict-frontend-e2e-trial-2026-10-1-mvap8fum",
+    "title": "PolyVerdict frontend e2e trial 2026-10-16T08:21Z",
+    "creator": "0xe8871c3a6feeff8f87779e9d71c3e31626c6c7b1",
+    "status_name": "OPEN",
+    "source_whitelist": [
+      "apnews.com",
+      "federalreserve.gov"
+    ],
+    "source_urls": [
+      "https://apnews.com/hub/federal-reserve",
+      "https://www.federalreserve.gov/newsevents/pressreleases.htm"
+    ],
+    "end_timestamp": 1792311660,
+    "yes_pool": 0,
+    "no_pool": 0
+  },
+  "unexpected_console_errors": [],
+  "rpc_rate_limit_console_noise_count": 4,
+  "rpc_rate_limit_console_noise_note": "Studio Next public RPC allows 30 requests/min; background docket reads occasionally got HTTP 429/busy, which the app retries. They are not wallet/transaction errors."
+}

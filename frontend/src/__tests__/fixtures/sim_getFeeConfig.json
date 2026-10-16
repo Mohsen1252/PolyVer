@@ -1,0 +1,63 @@
+{
+ "enabled": true,
+ "policy": {
+  "genPerTimeUnit": "1",
+  "storageUnitPrice": "250000000",
+  "receiptGasPrice": "250000000",
+  "intrinsicGas": "21000",
+  "bootloaderOverhead": "60000",
+  "gasPerChangedSlot": "1000",
+  "calldataGasPerByte": "16",
+  "fixedProposeReceiptGas": "210000",
+  "fixedMessageRevealGas": "100000",
+  "receiptWrapperBytes": "1024",
+  "extraExecGas": "210000",
+  "messageFeeParamsBudgetFloor": "76548000000000",
+  "genvmStartBudgetFloor": "78852000000000",
+  "maxAllocationTreeDepth": "5",
+  "maxAllocatedMessages": "20",
+  "maxMessagesPerTx": "0",
+  "minExternalGasLimit": "0",
+  "defaultExternalGasLimit": "500000",
+  "maxEqOutputsBytes": "0",
+  "maxSubmittedMessagesBytes": "0",
+  "timeUnitOverlayBps": "1500",
+  "minProposeTimeunits": "30",
+  "maxProposeTimeunits": "600",
+  "minCommitTimeunits": "30",
+  "maxCommitTimeunits": "600"
+ },
+ "capabilities": {
+  "messageFees": {
+   "mode1": {
+    "accounting": true,
+    "genvmExecution": false
+   },
+   "mode2": {
+    "accounting": true,
+    "genvmExecution": true
+   },
+   "externalFinalization": {
+    "accounting": true,
+    "genvmExecution": true
+   }
+  }
+ },
+ "defaultFees": {
+  "distribution": {
+   "leaderTimeunitsAllocation": "100",
+   "validatorTimeunitsAllocation": "200",
+   "appealRounds": "0",
+   "executionBudgetPerRound": "76548000000000",
+   "executionConsumed": "0",
+   "totalMessageFees": "0",
+   "rotations": [
+    "0"
+   ],
+   "maxPriceGenPerTimeUnit": "2",
+   "storageFeeMaxGasPrice": "300000000",
+   "receiptFeeMaxGasPrice": "300000000"
+  },
+  "feeValue": "76548000002588"
+ }
+}

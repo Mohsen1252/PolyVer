@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview --port 4173 --strictPort",
-    "console-check": "node scripts/console-check.mjs"
+    "console-check": "node scripts/console-check.mjs",
+    "test": "vitest run",
+    "e2e:create-trial": "node scripts/e2e-create-trial.mjs"
   },
   "dependencies": {
     "genlayer-js": "^2.0.0-rc.1",
@@ -25,7 +27,8 @@
     "puppeteer-core": "^25.12.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
-    "vite": "^8.3.2"
+    "vite": "^8.3.2",
+    "vitest": "^4.1.12"
   },
   "author": "SOBEK96 <btcehsan@yahoo.com>",
   "description": "PolyVerdict Truth Court - prediction-market resolution HUD for GenLayer Studio Next"
